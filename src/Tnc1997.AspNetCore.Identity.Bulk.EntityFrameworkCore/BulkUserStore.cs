@@ -85,18 +85,13 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return Enumerable.Repeat(IdentityResult.Success, users.Count());
     }
 
-    public async Task<IEnumerable<IdentityResult>> UpdateAsync(IEnumerable<TUser> users, CancellationToken cancellationToken)
+    public async Task<IEnumerable<IdentityResult>> DeleteAsync(IEnumerable<TUser> users, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(users);
 
-        foreach (var user in users)
-        {
-            context.Attach(user);
-            user.ConcurrencyStamp = Guid.NewGuid().ToString();
-            context.Update(user);
-        }
+        context.RemoveRange(users);
 
         try
         {
@@ -110,13 +105,18 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return Enumerable.Repeat(IdentityResult.Success, users.Count());
     }
 
-    public async Task<IEnumerable<IdentityResult>> DeleteAsync(IEnumerable<TUser> users, CancellationToken cancellationToken)
+    public async Task<IEnumerable<IdentityResult>> UpdateAsync(IEnumerable<TUser> users, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(users);
 
-        context.RemoveRange(users);
+        foreach (var user in users)
+        {
+            context.Attach(user);
+            user.ConcurrencyStamp = Guid.NewGuid().ToString();
+            context.Update(user);
+        }
 
         try
         {
