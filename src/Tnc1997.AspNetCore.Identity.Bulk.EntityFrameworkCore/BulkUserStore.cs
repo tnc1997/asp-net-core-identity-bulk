@@ -133,5 +133,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
     public void Dispose()
     {
         _disposed = true;
+
+        GC.SuppressFinalize(this);
     }
 }
