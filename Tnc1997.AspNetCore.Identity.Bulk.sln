@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8B70BF0A-40BE-4C2B-AEB5-5F8AE5ADE17A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C2184207-F7E2-42A6-9DA0-1D5DCF776D2C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tnc1997.AspNetCore.Identity.Bulk.EntityFrameworkCore", "src\Tnc1997.AspNetCore.Identity.Bulk.EntityFrameworkCore\Tnc1997.AspNetCore.Identity.Bulk.EntityFrameworkCore.csproj", "{37A34223-202E-4C01-8F4D-62904CC9D45A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{37A34223-202E-4C01-8F4D-62904CC9D45A} = {8B70BF0A-40BE-4C2B-AEB5-5F8AE5ADE17A}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{37A34223-202E-4C01-8F4D-62904CC9D45A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37A34223-202E-4C01-8F4D-62904CC9D45A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37A34223-202E-4C01-8F4D-62904CC9D45A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37A34223-202E-4C01-8F4D-62904CC9D45A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
