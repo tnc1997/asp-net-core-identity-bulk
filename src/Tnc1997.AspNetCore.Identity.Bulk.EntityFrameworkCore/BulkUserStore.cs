@@ -72,7 +72,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey>(
 public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>(
     TContext context,
     IdentityErrorDescriber? describer = null)
-    : IBulkUserStore<TUser>
+    : IBulkUserEmailStore<TUser>
     where TUser : IdentityUser<TKey>
     where TRole : IdentityRole<TKey>
     where TContext : DbContext
@@ -86,6 +86,70 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
     private readonly IdentityErrorDescriber _describer = describer ?? new IdentityErrorDescriber();
 
     private bool _disposed;
+
+    #region IBulkUserEmailStore
+
+    public Task<IEnumerable<string?>> GetEmailsAsync(
+        IEnumerable<TUser> users,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(users);
+
+        return Task.FromResult(users.Select(user => user.Email));
+    }
+
+    public Task<IEnumerable<string?>> GetNormalizedEmailsAsync(
+        IEnumerable<TUser> users,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(users);
+
+        return Task.FromResult(users.Select(user => user.NormalizedEmail));
+    }
+
+    public Task SetEmailsAsync(
+        IEnumerable<TUser> users,
+        IEnumerable<string?> emails,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(users);
+        ArgumentNullException.ThrowIfNull(emails);
+
+        foreach (var (user, email) in users.Zip(emails))
+        {
+            user.Email = email;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task SetNormalizedEmailsAsync(
+        IEnumerable<TUser> users,
+        IEnumerable<string?> normalizedEmails,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(users);
+        ArgumentNullException.ThrowIfNull(normalizedEmails);
+
+        foreach (var (user, normalizedEmail) in users.Zip(normalizedEmails))
+        {
+            user.NormalizedEmail = normalizedEmail;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    #endregion
+
+    #region IBulkUserStore
 
     public virtual async Task<IEnumerable<IdentityResult>> CreateAsync(
         IEnumerable<TUser> users,
@@ -208,6 +272,8 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
 
         return Enumerable.Repeat(IdentityResult.Success, users.Count());
     }
+
+    #endregion
 
     public void Dispose()
     {
