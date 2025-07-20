@@ -89,7 +89,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
 
     #region IBulkUserEmailStore
 
-    public Task<IEnumerable<string?>> GetEmailsAsync(
+    public virtual Task<IEnumerable<string?>> GetEmailsAsync(
         IEnumerable<TUser> users,
         CancellationToken cancellationToken)
     {
@@ -100,7 +100,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return Task.FromResult(users.Select(user => user.Email));
     }
 
-    public Task<IEnumerable<string?>> GetNormalizedEmailsAsync(
+    public virtual Task<IEnumerable<string?>> GetNormalizedEmailsAsync(
         IEnumerable<TUser> users,
         CancellationToken cancellationToken)
     {
@@ -111,7 +111,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return Task.FromResult(users.Select(user => user.NormalizedEmail));
     }
 
-    public Task SetEmailsAsync(
+    public virtual Task SetEmailsAsync(
         IEnumerable<TUser> users,
         IEnumerable<string?> emails,
         CancellationToken cancellationToken)
@@ -129,7 +129,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return Task.CompletedTask;
     }
 
-    public Task SetNormalizedEmailsAsync(
+    public virtual Task SetNormalizedEmailsAsync(
         IEnumerable<TUser> users,
         IEnumerable<string?> normalizedEmails,
         CancellationToken cancellationToken)
@@ -151,7 +151,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
 
     #region IBulkUserLockoutStore
 
-    public Task<IEnumerable<bool>> GetLockoutEnabledAsync(
+    public virtual Task<IEnumerable<bool>> GetLockoutEnabledAsync(
         IEnumerable<TUser> users,
         CancellationToken cancellationToken)
     {
@@ -162,7 +162,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return Task.FromResult(users.Select(user => user.LockoutEnabled));
     }
 
-    public Task SetLockoutEnabledAsync(
+    public virtual Task SetLockoutEnabledAsync(
         IEnumerable<TUser> users,
         IEnumerable<bool> enabled,
         CancellationToken cancellationToken)
