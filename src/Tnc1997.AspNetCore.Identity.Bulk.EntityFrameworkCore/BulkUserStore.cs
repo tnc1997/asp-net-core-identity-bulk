@@ -72,16 +72,16 @@ public class BulkUserStore<TUser, TRole, TContext, TKey>(
 public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>(
     TContext context,
     IdentityErrorDescriber? describer = null)
-    : IBulkUserEmailStore<TUser>, IBulkUserLockoutStore<TUser>
+    : IBulkUserEmailStore<TUser>, IBulkUserLockoutStore<TUser>, IBulkUserLoginStore<TUser>
     where TUser : IdentityUser<TKey>
     where TRole : IdentityRole<TKey>
     where TContext : DbContext
     where TKey : IEquatable<TKey>
-    where TUserClaim : IdentityUserClaim<TKey>
-    where TUserRole : IdentityUserRole<TKey>
-    where TUserLogin : IdentityUserLogin<TKey>
-    where TUserToken : IdentityUserToken<TKey>
-    where TRoleClaim : IdentityRoleClaim<TKey>
+    where TUserClaim : IdentityUserClaim<TKey>, new()
+    where TUserRole : IdentityUserRole<TKey>, new()
+    where TUserLogin : IdentityUserLogin<TKey>, new()
+    where TUserToken : IdentityUserToken<TKey>, new()
+    where TRoleClaim : IdentityRoleClaim<TKey>, new()
 {
     private readonly IdentityErrorDescriber _describer = describer ?? new IdentityErrorDescriber();
 
@@ -178,6 +178,59 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         }
 
         return Task.CompletedTask;
+    }
+
+    #endregion
+
+    #region IBulkUserLoginStore
+
+    public virtual Task AddLoginsAsync(
+        IEnumerable<TUser> users,
+        IEnumerable<UserLoginInfo> logins,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(users);
+        ArgumentNullException.ThrowIfNull(logins);
+
+        foreach (var (user, login) in users.Zip(logins))
+        {
+            context.Add(new TUserLogin
+            {
+                UserId = user.Id,
+                LoginProvider = login.LoginProvider,
+                ProviderKey = login.ProviderKey,
+                ProviderDisplayName = login.ProviderDisplayName
+            });
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public virtual async Task RemoveLoginsAsync(
+        IEnumerable<TUser> users,
+        IEnumerable<string> loginProviders,
+        IEnumerable<string> providerKeys,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(users);
+        ArgumentNullException.ThrowIfNull(loginProviders);
+        ArgumentNullException.ThrowIfNull(providerKeys);
+
+        var userLogins = users
+            .Zip(loginProviders, providerKeys)
+            .Select(tuple => new TUserLogin { UserId = tuple.First.Id, LoginProvider = tuple.Second, ProviderKey = tuple.Third })
+            .ToList();
+
+        var entities = await context
+            .Set<TUserLogin>()
+            .Where(entity => userLogins.Any(userLogin => entity.UserId.Equals(userLogin.UserId) && entity.LoginProvider == userLogin.LoginProvider && entity.ProviderKey == userLogin.ProviderKey))
+            .ToListAsync(cancellationToken);
+
+        context.RemoveRange(entities);
     }
 
     #endregion
