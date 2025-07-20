@@ -87,7 +87,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
 
     private bool _disposed;
 
-    public async Task<IEnumerable<IdentityResult>> CreateAsync(
+    public virtual async Task<IEnumerable<IdentityResult>> CreateAsync(
         IEnumerable<TUser> users,
         CancellationToken cancellationToken)
     {
@@ -102,7 +102,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return Enumerable.Repeat(IdentityResult.Success, users.Count());
     }
 
-    public async Task<IEnumerable<IdentityResult>> DeleteAsync(
+    public virtual async Task<IEnumerable<IdentityResult>> DeleteAsync(
         IEnumerable<TUser> users,
         CancellationToken cancellationToken)
     {
@@ -124,7 +124,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return Enumerable.Repeat(IdentityResult.Success, users.Count());
     }
 
-    public async Task<IEnumerable<IdentityResult>> UpdateAsync(
+    public virtual async Task<IEnumerable<IdentityResult>> UpdateAsync(
         IEnumerable<TUser> users,
         CancellationToken cancellationToken)
     {
