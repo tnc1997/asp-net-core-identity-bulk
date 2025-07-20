@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 
-namespace Tnc1997.AspNetCore.Identity.Bulk.EntityFrameworkCore;
+namespace Tnc1997.AspNetCore.Identity.Bulk;
 
 public interface IBulkUserStore<TUser>
     : IDisposable

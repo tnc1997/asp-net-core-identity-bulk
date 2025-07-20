@@ -9,4 +9,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0"/>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Tnc1997.AspNetCore.Identity.Bulk\Tnc1997.AspNetCore.Identity.Bulk.csproj"/>
+  </ItemGroup>
+
 </Project>
