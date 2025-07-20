@@ -27,6 +27,14 @@ public interface IBulkUserStore<TUser>
     Task<IEnumerable<IdentityResult>> DeleteAsync(IEnumerable<TUser> users, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Gets the normalized names for the specified <paramref name="users"/>.
+    /// </summary>
+    /// <param name="users">The users whose normalized names should be retrieved.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing the normalized names for the specified <paramref name="users"/>.</returns>
+    Task<IEnumerable<string?>> GetNormalizedUserNamesAsync(IEnumerable<TUser> users, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Gets the names for the specified <paramref name="users"/>.
     /// </summary>
     /// <param name="users">The users whose names should be retrieved.</param>
