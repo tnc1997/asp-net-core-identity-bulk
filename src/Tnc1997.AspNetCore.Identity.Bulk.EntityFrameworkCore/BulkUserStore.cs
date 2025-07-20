@@ -72,7 +72,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey>(
 public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>(
     TContext context,
     IdentityErrorDescriber? describer = null)
-    : IBulkUserEmailStore<TUser>
+    : IBulkUserEmailStore<TUser>, IBulkUserLockoutStore<TUser>
     where TUser : IdentityUser<TKey>
     where TRole : IdentityRole<TKey>
     where TContext : DbContext
@@ -142,6 +142,39 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         foreach (var (user, normalizedEmail) in users.Zip(normalizedEmails))
         {
             user.NormalizedEmail = normalizedEmail;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    #endregion
+
+    #region IBulkUserLockoutStore
+
+    public Task<IEnumerable<bool>> GetLockoutEnabledAsync(
+        IEnumerable<TUser> users,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(users);
+
+        return Task.FromResult(users.Select(user => user.LockoutEnabled));
+    }
+
+    public Task SetLockoutEnabledAsync(
+        IEnumerable<TUser> users,
+        IEnumerable<bool> enabled,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(users);
+        ArgumentNullException.ThrowIfNull(enabled);
+
+        foreach (var (user, lockoutEnabled) in users.Zip(enabled))
+        {
+            user.LockoutEnabled = lockoutEnabled;
         }
 
         return Task.CompletedTask;
