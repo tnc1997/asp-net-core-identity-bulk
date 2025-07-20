@@ -146,6 +146,24 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return Task.FromResult(users.Select(user => user.UserName));
     }
 
+    public virtual Task SetNormalizedUserNamesAsync(
+        IEnumerable<TUser> users,
+        IEnumerable<string?> normalizedNames,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(users);
+        ArgumentNullException.ThrowIfNull(normalizedNames);
+
+        foreach (var (user, normalizedName) in users.Zip(normalizedNames))
+        {
+            user.NormalizedUserName = normalizedName;
+        }
+
+        return Task.CompletedTask;
+    }
+
     public virtual Task SetUserNamesAsync(
         IEnumerable<TUser> users,
         IEnumerable<string?> userNames,

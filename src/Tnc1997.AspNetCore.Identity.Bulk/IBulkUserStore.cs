@@ -43,6 +43,15 @@ public interface IBulkUserStore<TUser>
     Task<IEnumerable<string?>> GetUserNamesAsync(IEnumerable<TUser> users, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Sets the given <see cref="normalizedNames"/> for the specified <paramref name="users"/>.
+    /// </summary>
+    /// <param name="users">The users whose names should be set.</param>
+    /// <param name="normalizedNames">The normalized names to set.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <returns>The <see cref="Task"/> that represents the asynchronous operation.</returns>
+    Task SetNormalizedUserNamesAsync(IEnumerable<TUser> users, IEnumerable<string?> normalizedNames, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Sets the given <paramref name="userNames"/> for the specified <paramref name="users"/>.
     /// </summary>
     /// <param name="users">The users whose names should be set.</param>
