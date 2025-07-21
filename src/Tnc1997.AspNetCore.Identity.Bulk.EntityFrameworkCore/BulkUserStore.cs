@@ -112,16 +112,14 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
     }
 
     public virtual Task SetEmailsAsync(
-        IEnumerable<TUser> users,
-        IEnumerable<string?> emails,
+        IEnumerable<(TUser, string?)> tuples,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-        ArgumentNullException.ThrowIfNull(emails);
+        ArgumentNullException.ThrowIfNull(tuples);
 
-        foreach (var (user, email) in users.Zip(emails))
+        foreach (var (user, email) in tuples)
         {
             user.Email = email;
         }
@@ -130,16 +128,14 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
     }
 
     public virtual Task SetNormalizedEmailsAsync(
-        IEnumerable<TUser> users,
-        IEnumerable<string?> normalizedEmails,
+        IEnumerable<(TUser, string?)> tuples,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-        ArgumentNullException.ThrowIfNull(normalizedEmails);
+        ArgumentNullException.ThrowIfNull(tuples);
 
-        foreach (var (user, normalizedEmail) in users.Zip(normalizedEmails))
+        foreach (var (user, normalizedEmail) in tuples)
         {
             user.NormalizedEmail = normalizedEmail;
         }
@@ -163,16 +159,14 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
     }
 
     public virtual Task SetLockoutEnabledAsync(
-        IEnumerable<TUser> users,
-        IEnumerable<bool> enabled,
+        IEnumerable<(TUser, bool)> tuples,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-        ArgumentNullException.ThrowIfNull(enabled);
+        ArgumentNullException.ThrowIfNull(tuples);
 
-        foreach (var (user, lockoutEnabled) in users.Zip(enabled))
+        foreach (var (user, lockoutEnabled) in tuples)
         {
             user.LockoutEnabled = lockoutEnabled;
         }
@@ -185,44 +179,36 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
     #region IBulkUserLoginStore
 
     public virtual Task AddLoginsAsync(
-        IEnumerable<TUser> users,
-        IEnumerable<UserLoginInfo> logins,
+        IEnumerable<(TUser, UserLoginInfo)> tuples,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-        ArgumentNullException.ThrowIfNull(logins);
+        ArgumentNullException.ThrowIfNull(tuples);
 
-        foreach (var (user, login) in users.Zip(logins))
+        var entities = tuples.Select(tuple => new TUserLogin
         {
-            context.Add(new TUserLogin
-            {
-                UserId = user.Id,
-                LoginProvider = login.LoginProvider,
-                ProviderKey = login.ProviderKey,
-                ProviderDisplayName = login.ProviderDisplayName
-            });
-        }
+            UserId = tuple.Item1.Id,
+            LoginProvider = tuple.Item2.LoginProvider,
+            ProviderKey = tuple.Item2.ProviderKey,
+            ProviderDisplayName = tuple.Item2.ProviderDisplayName
+        });
+
+        context.AddRange(entities);
 
         return Task.CompletedTask;
     }
 
     public virtual async Task RemoveLoginsAsync(
-        IEnumerable<TUser> users,
-        IEnumerable<string> loginProviders,
-        IEnumerable<string> providerKeys,
+        IEnumerable<(TUser, string, string)> tuples,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-        ArgumentNullException.ThrowIfNull(loginProviders);
-        ArgumentNullException.ThrowIfNull(providerKeys);
+        ArgumentNullException.ThrowIfNull(tuples);
 
-        var userLogins = users
-            .Zip(loginProviders, providerKeys)
-            .Select(tuple => new TUserLogin { UserId = tuple.First.Id, LoginProvider = tuple.Second, ProviderKey = tuple.Third })
+        var userLogins = tuples
+            .Select(tuple => new TUserLogin { UserId = tuple.Item1.Id, LoginProvider = tuple.Item2, ProviderKey = tuple.Item3 })
             .ToList();
 
         var entities = await context
@@ -297,16 +283,14 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
     }
 
     public virtual Task SetNormalizedUserNamesAsync(
-        IEnumerable<TUser> users,
-        IEnumerable<string?> normalizedNames,
+        IEnumerable<(TUser, string?)> tuples,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-        ArgumentNullException.ThrowIfNull(normalizedNames);
+        ArgumentNullException.ThrowIfNull(tuples);
 
-        foreach (var (user, normalizedName) in users.Zip(normalizedNames))
+        foreach (var (user, normalizedName) in tuples)
         {
             user.NormalizedUserName = normalizedName;
         }
@@ -315,16 +299,14 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
     }
 
     public virtual Task SetUserNamesAsync(
-        IEnumerable<TUser> users,
-        IEnumerable<string?> userNames,
+        IEnumerable<(TUser, string?)> tuples,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-        ArgumentNullException.ThrowIfNull(userNames);
+        ArgumentNullException.ThrowIfNull(tuples);
 
-        foreach (var (user, userName) in users.Zip(userNames))
+        foreach (var (user, userName) in tuples)
         {
             user.UserName = userName;
         }

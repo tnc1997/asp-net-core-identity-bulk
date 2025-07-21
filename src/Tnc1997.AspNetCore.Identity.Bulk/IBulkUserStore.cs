@@ -43,22 +43,20 @@ public interface IBulkUserStore<TUser>
     Task<IEnumerable<string?>> GetUserNamesAsync(IEnumerable<TUser> users, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Sets the given <see cref="normalizedNames"/> for the specified <paramref name="users"/>.
+    /// Sets the given normalized names for the specified users.
     /// </summary>
-    /// <param name="users">The users whose names should be set.</param>
-    /// <param name="normalizedNames">The normalized names to set.</param>
+    /// <param name="tuples">The users whose normalized names should be set and the normalized names to set.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
     /// <returns>The <see cref="Task"/> that represents the asynchronous operation.</returns>
-    Task SetNormalizedUserNamesAsync(IEnumerable<TUser> users, IEnumerable<string?> normalizedNames, CancellationToken cancellationToken);
+    Task SetNormalizedUserNamesAsync(IEnumerable<(TUser, string?)> tuples, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Sets the given <paramref name="userNames"/> for the specified <paramref name="users"/>.
+    /// Sets the given names for the specified users.
     /// </summary>
-    /// <param name="users">The users whose names should be set.</param>
-    /// <param name="userNames">The names to set.</param>
+    /// <param name="tuples">The users whose names should be set and the names to set.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
     /// <returns>The <see cref="Task"/> that represents the asynchronous operation.</returns>
-    Task SetUserNamesAsync(IEnumerable<TUser> users, IEnumerable<string?> userNames, CancellationToken cancellationToken);
+    Task SetUserNamesAsync(IEnumerable<(TUser, string?)> tuples, CancellationToken cancellationToken);
 
     /// <summary>
     /// Updates the specified <paramref name="users"/> in the user store.

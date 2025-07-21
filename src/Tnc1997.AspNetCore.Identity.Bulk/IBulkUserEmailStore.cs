@@ -25,20 +25,18 @@ public interface IBulkUserEmailStore<TUser>
     Task<IEnumerable<string?>> GetNormalizedEmailsAsync(IEnumerable<TUser> users, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Sets the <paramref name="emails"/> for the specified <paramref name="users"/>.
+    /// Sets the emails for the specified users.
     /// </summary>
-    /// <param name="users">The users whose emails should be set.</param>
-    /// <param name="emails">The emails to set.</param>
+    /// <param name="tuples">The users whose emails should be set and the emails to set.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
     /// <returns>The task object representing the asynchronous operation.</returns>
-    Task SetEmailsAsync(IEnumerable<TUser> users, IEnumerable<string?> emails, CancellationToken cancellationToken);
+    Task SetEmailsAsync(IEnumerable<(TUser, string?)> tuples, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Sets the <paramref name="normalizedEmails"/> for the specified <paramref name="users"/>.
+    /// Sets the normalized emails for the specified users.
     /// </summary>
-    /// <param name="users">The users whose normalized emails should be set.</param>
-    /// <param name="normalizedEmails">The normalized emails to set.</param>
+    /// <param name="tuples">The users whose normalized emails should be set and the normalized emails to set.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
     /// <returns>The task object representing the asynchronous operation.</returns>
-    Task SetNormalizedEmailsAsync(IEnumerable<TUser> users, IEnumerable<string?> normalizedEmails, CancellationToken cancellationToken);
+    Task SetNormalizedEmailsAsync(IEnumerable<(TUser, string?)> tuples, CancellationToken cancellationToken);
 }
