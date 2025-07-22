@@ -72,7 +72,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey>(
 public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>(
     TContext context,
     IdentityErrorDescriber? describer = null)
-    : IBulkUserEmailStore<TUser>, IBulkUserLockoutStore<TUser>, IBulkUserLoginStore<TUser>
+    : IBulkUserEmailStore<TUser>, IBulkUserLockoutStore<TUser>, IBulkUserLoginStore<TUser>, IBulkUserSecurityStampStore<TUser>
     where TUser : IdentityUser<TKey>
     where TRole : IdentityRole<TKey>
     where TContext : DbContext
@@ -217,6 +217,37 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
             .ToListAsync(cancellationToken);
 
         context.RemoveRange(entities);
+    }
+
+    #endregion
+
+    #region IBulkUserSecurityStampStore
+
+    public Task<IEnumerable<string?>> GetSecurityStampsAsync(
+	    IEnumerable<TUser> users,
+	    CancellationToken cancellationToken)
+    {
+	    cancellationToken.ThrowIfCancellationRequested();
+	    ObjectDisposedException.ThrowIf(_disposed, this);
+	    ArgumentNullException.ThrowIfNull(users);
+
+	    return Task.FromResult(users.Select(user => user.SecurityStamp));
+    }
+
+    public Task SetSecurityStampsAsync(
+	    IEnumerable<(TUser, string?)> tuples,
+	    CancellationToken cancellationToken)
+    {
+	    cancellationToken.ThrowIfCancellationRequested();
+	    ObjectDisposedException.ThrowIf(_disposed, this);
+	    ArgumentNullException.ThrowIfNull(tuples);
+
+	    foreach (var (user, securityStamp) in tuples)
+	    {
+		    user.SecurityStamp = securityStamp;
+	    }
+
+	    return Task.CompletedTask;
     }
 
     #endregion
