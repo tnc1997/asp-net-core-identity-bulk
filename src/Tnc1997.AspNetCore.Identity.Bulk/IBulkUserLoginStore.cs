@@ -16,7 +16,15 @@ public interface IBulkUserLoginStore<TUser>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
     /// <returns>The <see cref="Task"/> that represents the asynchronous operation.</returns>
     Task AddLoginsAsync(IEnumerable<(TUser, UserLoginInfo)> tuples, CancellationToken cancellationToken);
-    
+
+    /// <summary>
+    /// Retrieves the users associated with the specified login providers and provider keys.
+    /// </summary>
+    /// <param name="tuples">The login providers who provided the provider keys and the keys provided by the login providers to identify the users.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <returns>The <see cref="Task"/> for the asynchronous operation, containing the users, if any that matched the specified login providers and keys.</returns>
+    Task<IEnumerable<TUser?>> FindByLoginsAsync(IEnumerable<(string, string)> tuples, CancellationToken cancellationToken);
+
     /// <summary>
     /// Removes the provided logins from the specified users.
     /// </summary>

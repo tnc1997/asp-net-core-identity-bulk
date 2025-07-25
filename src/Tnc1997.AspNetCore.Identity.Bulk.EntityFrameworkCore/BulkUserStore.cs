@@ -199,6 +199,45 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return Task.CompletedTask;
     }
 
+    public virtual async Task<IEnumerable<TUser?>> FindByLoginsAsync(
+        IEnumerable<(string, string)> tuples,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(tuples);
+
+        var loginProviders = new List<string>();
+        var providerKeys = new List<string>();
+
+        foreach (var (loginProvider, providerKey) in tuples)
+        {
+            loginProviders.Add(loginProvider);
+            providerKeys.Add(providerKey);
+        }
+
+        var args = await context
+            .Set<TUserLogin>()
+            .Where(userLogin => loginProviders.Contains(userLogin.LoginProvider) && providerKeys.Contains(userLogin.ProviderKey))
+            .GroupJoin(context.Set<TUser>(), userLogin => userLogin.UserId, user => user.Id, (userLogin, users) => new { UserLogin = userLogin, Users = users })
+            .SelectMany(args => args.Users.DefaultIfEmpty(), (args, user) => new { args.UserLogin, User = user })
+            .ToListAsync(cancellationToken);
+
+        var users = new List<TUser?>();
+
+        foreach (var (loginProvider, providerKey) in tuples)
+        {
+            var user = args
+                .Where(args => args.UserLogin.LoginProvider == loginProvider && args.UserLogin.ProviderKey == providerKey)
+                .Select(args => args.User)
+                .SingleOrDefault();
+
+            users.Add(user);
+        }
+
+        return users;
+    }
+
     public virtual async Task RemoveLoginsAsync(
         IEnumerable<(TUser, string, string)> tuples,
         CancellationToken cancellationToken)
