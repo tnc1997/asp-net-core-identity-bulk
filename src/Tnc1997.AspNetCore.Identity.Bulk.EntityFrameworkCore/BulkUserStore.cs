@@ -246,16 +246,23 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(tuples);
 
-        var userLogins = tuples
-            .Select(tuple => new TUserLogin { UserId = tuple.Item1.Id, LoginProvider = tuple.Item2, ProviderKey = tuple.Item3 })
-            .ToList();
+        var userIds = new List<TKey>();
+        var loginProviders = new List<string>();
+        var providerKeys = new List<string>();
 
-        var entities = await context
+        foreach (var (user, loginProvider, providerKey) in tuples)
+        {
+            userIds.Add(user.Id);
+            loginProviders.Add(loginProvider);
+            providerKeys.Add(providerKey);
+        }
+
+        var userLogins = await context
             .Set<TUserLogin>()
-            .Where(entity => userLogins.Any(userLogin => entity.UserId.Equals(userLogin.UserId) && entity.LoginProvider == userLogin.LoginProvider && entity.ProviderKey == userLogin.ProviderKey))
+            .Where(userLogin => userIds.Contains(userLogin.UserId) && loginProviders.Contains(userLogin.LoginProvider) && providerKeys.Contains(userLogin.ProviderKey))
             .ToListAsync(cancellationToken);
 
-        context.RemoveRange(entities);
+        context.RemoveRange(userLogins);
     }
 
     #endregion
