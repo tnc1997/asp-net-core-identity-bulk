@@ -120,6 +120,25 @@ public class BulkUserStoreTests
     }
 
     [Test]
+    public async Task SetUserNamesAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var users = new List<IdentityUser<string>> { new(), new() };
+        var expected = new List<string?> { "alice", "bob" };
+        var tuples = users.Zip(expected).ToList();
+
+        // Act
+        await store.SetUserNamesAsync(tuples, CancellationToken.None);
+
+        // Assert
+        var actual = users.Select(user => user.UserName);
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
     public async Task UpdateAsync()
     {
         // Arrange
