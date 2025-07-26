@@ -75,7 +75,6 @@ public class BulkUserStoreTests
         using var store = new BulkUserStore(_context);
 
         var expected = new List<string> { "ALICE", "BOB" };
-
         var users = expected.Select(normalizedUserName => new IdentityUser { NormalizedUserName = normalizedUserName });
 
         // Act
@@ -92,13 +91,31 @@ public class BulkUserStoreTests
         using var store = new BulkUserStore(_context);
 
         var expected = new List<string> { "alice", "bob" };
-
         var users = expected.Select(userName => new IdentityUser { UserName = userName });
 
         // Act
         var actual = await store.GetUserNamesAsync(users, CancellationToken.None);
 
         // Assert
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public async Task SetNormalizedUserNamesAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var users = new List<IdentityUser<string>> { new(), new() };
+        var expected = new List<string?> { "ALICE", "BOB" };
+        var tuples = users.Zip(expected).ToList();
+
+        // Act
+        await store.SetNormalizedUserNamesAsync(tuples, CancellationToken.None);
+
+        // Assert
+        var actual = users.Select(user => user.NormalizedUserName);
+
         Assert.That(actual, Is.EqualTo(expected));
     }
 

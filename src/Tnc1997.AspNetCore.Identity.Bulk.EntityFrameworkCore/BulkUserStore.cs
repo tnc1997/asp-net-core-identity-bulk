@@ -24,7 +24,7 @@ public class BulkUserStore(
 public class BulkUserStore<TUser>(
     DbContext context,
     IdentityErrorDescriber? describer = null)
-    : BulkUserStore<TUser, IdentityRole, DbContext, string>(context, describer)
+    : BulkUserStore<TUser, IdentityRole<string>, DbContext, string>(context, describer)
     where TUser : IdentityUser<string>;
 
 /// <summary>
