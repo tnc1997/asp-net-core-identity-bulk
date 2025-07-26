@@ -69,6 +69,23 @@ public class BulkUserStoreTests
     }
 
     [Test]
+    public async Task GetNormalizedUserNamesAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var expected = new List<string> { "ALICE", "BOB" };
+
+        var users = expected.Select(normalizedUserName => new IdentityUser { NormalizedUserName = normalizedUserName });
+
+        // Act
+        var actual = await store.GetNormalizedUserNamesAsync(users, CancellationToken.None);
+
+        // Assert
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
     public async Task UpdateAsync()
     {
         // Arrange
