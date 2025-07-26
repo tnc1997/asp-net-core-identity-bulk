@@ -36,7 +36,7 @@ public class BulkUserStoreTests
         // Arrange
         using var store = new BulkUserStore(_context);
 
-        var expected = new List<IdentityUser> { new("alice"), new("bob") };
+        var expected = new List<IdentityUser> { new() { UserName = "alice" }, new() { UserName = "bob" } };
 
         // Act
         await store.CreateAsync(expected, CancellationToken.None);
@@ -53,7 +53,7 @@ public class BulkUserStoreTests
         // Arrange
         using var store = new BulkUserStore(_context);
 
-        var users = new List<IdentityUser> { new("alice"), new("bob") };
+        var users = new List<IdentityUser> { new() { UserName = "alice" }, new() { UserName = "bob" } };
 
         _context.Users.AddRange(users);
 
@@ -74,7 +74,7 @@ public class BulkUserStoreTests
         // Arrange
         using var store = new BulkUserStore(_context);
 
-        var users = new List<IdentityUser> { new("alice"), new("bob") };
+        var users = new List<IdentityUser> { new() { UserName = "alice" }, new() { UserName = "bob" } };
 
         _context.Users.AddRange(users);
 
