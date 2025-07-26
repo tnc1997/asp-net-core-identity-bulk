@@ -47,7 +47,7 @@ public class BulkUserStore<TUser, TRole, TContext>(
 /// <typeparam name="TUser">The type representing a user.</typeparam>
 /// <typeparam name="TRole">The type representing a role.</typeparam>
 /// <typeparam name="TContext">The type of the data context class used to access the store.</typeparam>
-/// <typeparam name="TKey">The type of the primary key for a role.</typeparam>
+/// <typeparam name="TKey">The type of the primary key for a user.</typeparam>
 public class BulkUserStore<TUser, TRole, TContext, TKey>(
     TContext context,
     IdentityErrorDescriber? describer = null)
@@ -63,7 +63,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey>(
 /// <typeparam name="TUser">The type representing a user.</typeparam>
 /// <typeparam name="TRole">The type representing a role.</typeparam>
 /// <typeparam name="TContext">The type of the data context class used to access the store.</typeparam>
-/// <typeparam name="TKey">The type of the primary key for a role.</typeparam>
+/// <typeparam name="TKey">The type of the primary key for a user.</typeparam>
 /// <typeparam name="TUserClaim">The type representing a claim.</typeparam>
 /// <typeparam name="TUserRole">The type representing a user role.</typeparam>
 /// <typeparam name="TUserLogin">The type representing a user external login.</typeparam>
