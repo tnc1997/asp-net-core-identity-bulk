@@ -72,7 +72,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey>(
 public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>(
     TContext context,
     IdentityErrorDescriber? describer = null)
-    : IBulkUserEmailStore<TUser>, IBulkUserLockoutStore<TUser>, IBulkUserLoginStore<TUser>, IBulkUserSecurityStampStore<TUser>
+    : IBulkUserEmailStore<TUser>, IBulkUserLockoutStore<TUser>, IBulkUserLoginStore<TUser>, IBulkUserRoleStore<TUser>, IBulkUserSecurityStampStore<TUser>
     where TUser : IdentityUser<TKey>
     where TRole : IdentityRole<TKey>
     where TContext : DbContext
@@ -263,6 +263,107 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
             .ToListAsync(cancellationToken);
 
         context.RemoveRange(userLogins);
+    }
+
+    #endregion
+
+    #region IBulkUserRoleStore
+
+    public virtual async Task AddToRolesAsync(
+        IEnumerable<(TUser, string)> tuples,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(tuples);
+
+        var userIds = new List<TKey>();
+        var normalizedNames = new List<string?>();
+
+        foreach (var (user, normalizedName) in tuples)
+        {
+            userIds.Add(user.Id);
+            normalizedNames.Add(normalizedName);
+        }
+
+        var roles = await context
+            .Set<TRole>()
+            .Where(role => normalizedNames.Contains(role.NormalizedName))
+            .ToListAsync(cancellationToken);
+
+        var exceptions = new List<Exception>();
+
+        for (var i = 0; i < normalizedNames.Count; i++)
+        {
+            if (roles.SingleOrDefault(role => role.NormalizedName == normalizedNames[i]) is {  } role)
+            {
+                context.Add(new TUserRole { UserId = userIds[i], RoleId = role.Id });
+            }
+            else
+            {
+                exceptions.Add(new InvalidOperationException($"Role {normalizedNames[i]} does not exist."));
+            }
+        }
+
+        if (exceptions.Count > 0)
+        {
+            throw new AggregateException(exceptions);
+        }
+    }
+
+    public virtual async Task<IEnumerable<bool>> AreInRolesAsync(
+        IEnumerable<(TUser, string)> tuples,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(tuples);
+
+        var userIds = new List<TKey>();
+        var normalizedNames = new List<string?>();
+
+        foreach (var (user, normalizedName) in tuples)
+        {
+            userIds.Add(user.Id);
+            normalizedNames.Add(normalizedName);
+        }
+
+        var userRoleUserIds = await context
+            .Set<TRole>()
+            .Where(role => normalizedNames.Contains(role.NormalizedName))
+            .Join(context.Set<TUserRole>(), role => role.Id, userRole => userRole.RoleId, (role, userRole) => userRole.UserId)
+            .ToListAsync(cancellationToken);
+
+        return userIds
+            .Select(userId => userRoleUserIds.Contains(userId))
+            .ToList();
+    }
+
+    public virtual async Task RemoveFromRolesAsync(
+        IEnumerable<(TUser, string)> tuples,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(tuples);
+
+        var userIds = new List<TKey>();
+        var normalizedNames = new List<string?>();
+
+        foreach (var (user, normalizedName) in tuples)
+        {
+            userIds.Add(user.Id);
+            normalizedNames.Add(normalizedName);
+        }
+
+        var userRoles = await context
+            .Set<TRole>()
+            .Where(role => normalizedNames.Contains(role.NormalizedName))
+            .Join(context.Set<TUserRole>(), role => role.Id, userRole => userRole.RoleId, (role, userRole) => userRole)
+            .Where(userRole => userIds.Contains(userRole.UserId))
+            .ToListAsync(cancellationToken);
+        
+        context.RemoveRange(userRoles);
     }
 
     #endregion
