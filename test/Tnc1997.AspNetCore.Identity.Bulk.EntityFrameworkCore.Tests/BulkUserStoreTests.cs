@@ -104,6 +104,26 @@ public class BulkUserStoreTests
 
     #endregion
 
+    #region IBulkUserLockoutStore
+
+    [Test]
+    public async Task GetLockoutEnabledAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var expected = new List<bool> { true, true };
+        var users = expected.Select(lockoutEnabled => new IdentityUser { LockoutEnabled = lockoutEnabled });
+
+        // Act
+        var actual = await store.GetLockoutEnabledAsync(users, CancellationToken.None);
+
+        // Assert
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    #endregion
+
     #region IUserStore
 
     [Test]
