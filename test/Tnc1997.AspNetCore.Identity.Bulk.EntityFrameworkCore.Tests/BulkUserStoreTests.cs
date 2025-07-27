@@ -151,21 +151,19 @@ public class BulkUserStoreTests
         // Arrange
         using var store = new BulkUserStore(_context);
 
-        var users = new List<IdentityUser<string>>
+        var tuples = new List<(IdentityUser<string>, UserLoginInfo)>
         {
-            new() { Id = "1a535a33-ae5d-4ecd-8067-47acf8b4b678" },
-            new() { Id = "26606db9-66b3-4ab0-a8d0-8bd5860e776a" }
+            (
+                new IdentityUser<string> { Id = "1a535a33-ae5d-4ecd-8067-47acf8b4b678" },
+                new UserLoginInfo("Facebook", "a8737ad6-71ab-46ca-b89d-a7d932e0f4c2", null)
+            ),
+            (
+                new IdentityUser<string> { Id = "26606db9-66b3-4ab0-a8d0-8bd5860e776a" },
+                new UserLoginInfo("Google", "b184c76d-cfa0-4eec-82b4-3a25b4f64574", null)
+            )
         };
 
-        var logins = new List<UserLoginInfo>
-        {
-            new("Facebook", "a8737ad6-71ab-46ca-b89d-a7d932e0f4c2", null),
-            new("Google", "b184c76d-cfa0-4eec-82b4-3a25b4f64574", null)
-        };
-
-        var tuples = users.Zip(logins).ToList();
-
-        foreach (var user in users)
+        foreach (var (user, _) in tuples)
         {
             _context.Add(user);
         }
@@ -187,18 +185,61 @@ public class BulkUserStoreTests
         var expected = tuples
             .Select(tuple => new IdentityUserLogin<string>
             {
-                UserId = tuple.First.Id,
-                LoginProvider = tuple.Second.LoginProvider,
-                ProviderKey = tuple.Second.ProviderKey,
-                ProviderDisplayName = tuple.Second.ProviderDisplayName
+                UserId = tuple.Item1.Id,
+                LoginProvider = tuple.Item2.LoginProvider,
+                ProviderKey = tuple.Item2.ProviderKey,
+                ProviderDisplayName = tuple.Item2.ProviderDisplayName
             })
             .ToList();
 
         Assert.That(actual, Is.EqualTo(expected).Using(new IdentityUserLoginComparer()));
     }
 
+    [Test]
+    public async Task RemoveLoginsAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var tuples = new List<(IdentityUser<string>, string, string)>
+        {
+            (
+                new IdentityUser<string> { Id = "1a535a33-ae5d-4ecd-8067-47acf8b4b678" },
+                "Facebook",
+                "a8737ad6-71ab-46ca-b89d-a7d932e0f4c2"
+            ),
+            (
+                new IdentityUser<string> { Id = "26606db9-66b3-4ab0-a8d0-8bd5860e776a" },
+                "Google",
+                "b184c76d-cfa0-4eec-82b4-3a25b4f64574"
+            )
+        };
+
+        foreach (var (user, loginProvider, providerKey) in tuples)
+        {
+            _context.Add(user);
+
+            _context.Add(new IdentityUserLogin<string>
+            {
+                UserId = user.Id, LoginProvider = loginProvider, ProviderKey = providerKey
+            });
+        }
+
+        await _context.SaveChangesAsync();
+
+        // Act
+        await store.RemoveLoginsAsync(tuples, CancellationToken.None);
+
+        await _context.SaveChangesAsync();
+
+        // Assert
+        var actual = await _context.UserLogins.ToListAsync();
+
+        Assert.That(actual, Is.Empty);
+    }
+
     #endregion
-    
+
     #region IUserStore
 
     [Test]
