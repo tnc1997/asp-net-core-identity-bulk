@@ -14,7 +14,7 @@ public class BulkUserStoreTests
 {
     private SqliteConnection _connection;
 
-    private IdentityDbContext _context;
+    private IdentityDbContext<IdentityUser<string>, IdentityRole<string>, string> _context;
 
     [SetUp]
     public async Task SetUp()
@@ -25,7 +25,7 @@ public class BulkUserStoreTests
 
         var options = new DbContextOptionsBuilder().UseSqlite(_connection).Options;
 
-        _context = new IdentityDbContext(options);
+        _context = new IdentityDbContext<IdentityUser<string>, IdentityRole<string>, string>(options);
 
         await _context.Database.EnsureCreatedAsync();
     }
@@ -143,6 +143,62 @@ public class BulkUserStoreTests
 
     #endregion
 
+    #region IBulkUserLoginStore
+
+    [Test]
+    public async Task AddLoginsAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var users = new List<IdentityUser<string>>
+        {
+            new() { Id = "1a535a33-ae5d-4ecd-8067-47acf8b4b678" },
+            new() { Id = "26606db9-66b3-4ab0-a8d0-8bd5860e776a" }
+        };
+
+        var logins = new List<UserLoginInfo>
+        {
+            new("Facebook", "a8737ad6-71ab-46ca-b89d-a7d932e0f4c2", null),
+            new("Google", "b184c76d-cfa0-4eec-82b4-3a25b4f64574", null)
+        };
+
+        var tuples = users.Zip(logins).ToList();
+
+        foreach (var user in users)
+        {
+            _context.Add(user);
+        }
+
+        await _context.SaveChangesAsync();
+
+        // Act
+        await store.AddLoginsAsync(tuples, CancellationToken.None);
+
+        await _context.SaveChangesAsync();
+
+        // Assert
+        var actual = await _context.UserLogins
+            .OrderBy(userLogin => userLogin.UserId)
+            .ThenBy(userLogin => userLogin.LoginProvider)
+            .ThenBy(userLogin => userLogin.ProviderKey)
+            .ToListAsync();
+
+        var expected = tuples
+            .Select(tuple => new IdentityUserLogin<string>
+            {
+                UserId = tuple.First.Id,
+                LoginProvider = tuple.Second.LoginProvider,
+                ProviderKey = tuple.Second.ProviderKey,
+                ProviderDisplayName = tuple.Second.ProviderDisplayName
+            })
+            .ToList();
+
+        Assert.That(actual, Is.EqualTo(expected).Using(new IdentityUserLoginComparer()));
+    }
+
+    #endregion
+    
     #region IUserStore
 
     [Test]
@@ -157,7 +213,9 @@ public class BulkUserStoreTests
         await store.CreateAsync(expected, CancellationToken.None);
 
         // Assert
-        var actual = await _context.Users.OrderBy(user => user.UserName).ToListAsync();
+        var actual = await _context.Users
+            .OrderBy(user => user.UserName)
+            .ToListAsync();
 
         Assert.That(actual, Is.EqualTo(expected).Using(new IdentityUserComparer()));
     }
@@ -272,7 +330,9 @@ public class BulkUserStoreTests
         await store.UpdateAsync(users, CancellationToken.None);
 
         // Assert
-        var actual = await _context.Users.OrderBy(user => user.UserName).ToListAsync();
+        var actual = await _context.Users
+            .OrderBy(user => user.UserName)
+            .ToListAsync();
 
         Assert.That(actual, Is.EqualTo(users).Using(new IdentityUserComparer()));
     }
