@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Tnc1997.AspNetCore.Identity.Bulk.EntityFrameworkCore.Tests;
 
-public class IdentityUserComparer : IComparer<IdentityUser<string>>
+public class IdentityRoleComparer : IComparer<IdentityRole<string>>
 {
-    public int Compare(IdentityUser<string>? x, IdentityUser<string>? y)
+    public int Compare(IdentityRole<string>? x, IdentityRole<string>? y)
     {
         if (ReferenceEquals(x, y))
         {
@@ -23,6 +23,6 @@ public class IdentityUserComparer : IComparer<IdentityUser<string>>
             return -1;
         }
 
-        return string.Compare(x.UserName, y.UserName, StringComparison.Ordinal);
+        return string.Compare(x.Name, y.Name, StringComparison.Ordinal);
     }
 }
