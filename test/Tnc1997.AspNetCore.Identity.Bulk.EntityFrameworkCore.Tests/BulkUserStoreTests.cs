@@ -64,6 +64,25 @@ public class BulkUserStoreTests
         Assert.That(actual, Is.EqualTo(expected));
     }
 
+    [Test]
+    public async Task SetNormalizedEmailsAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var users = new List<IdentityUser<string>> { new(), new() };
+        var expected = new List<string?> { "ALICE@EXAMPLE.COM", "BOB@EXAMPLE.COM" };
+        var tuples = users.Zip(expected).ToList();
+
+        // Act
+        await store.SetNormalizedEmailsAsync(tuples, CancellationToken.None);
+
+        // Assert
+        var actual = users.Select(user => user.NormalizedEmail);
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
     #endregion
 
     #region IUserStore
