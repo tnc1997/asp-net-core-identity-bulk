@@ -30,6 +30,8 @@ public class BulkUserStoreTests
         await _context.Database.EnsureCreatedAsync();
     }
 
+    #region IUserStore
+
     [Test]
     public async Task CreateAsync()
     {
@@ -161,6 +163,8 @@ public class BulkUserStoreTests
 
         Assert.That(actual, Is.EqualTo(users).Using(new IdentityUserComparer()));
     }
+
+    #endregion
 
     [TearDown]
     public async Task TearDown()
