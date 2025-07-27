@@ -122,6 +122,25 @@ public class BulkUserStoreTests
         Assert.That(actual, Is.EqualTo(expected));
     }
 
+    [Test]
+    public async Task SetLockoutEnabledAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var users = new List<IdentityUser<string>> { new(), new() };
+        var expected = new List<bool> { true, true };
+        var tuples = users.Zip(expected).ToList();
+
+        // Act
+        await store.SetLockoutEnabledAsync(tuples, CancellationToken.None);
+
+        // Assert
+        var actual = users.Select(user => user.LockoutEnabled);
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
     #endregion
 
     #region IUserStore
