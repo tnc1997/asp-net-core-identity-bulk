@@ -297,6 +297,25 @@ public class BulkUserStoreTests
         Assert.That(actual, Is.EqualTo(expected));
     }
 
+    [Test]
+    public async Task SetSecurityStampsAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var users = new List<IdentityUser<string>> { new(), new() };
+        var expected = new List<string?> { Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
+        var tuples = users.Zip(expected).ToList();
+
+        // Act
+        await store.SetSecurityStampsAsync(tuples, CancellationToken.None);
+
+        // Assert
+        var actual = users.Select(user => user.SecurityStamp);
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
     #endregion
 
     #region IUserStore
