@@ -30,6 +30,26 @@ public class BulkUserStoreTests
         await _context.Database.EnsureCreatedAsync();
     }
 
+    #region IBulkUserEmailStore
+
+    [Test]
+    public async Task GetNormalizedEmailsAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var expected = new List<string> { "ALICE@EXAMPLE.COM", "BOB@EXAMPLE.COM" };
+        var users = expected.Select(normalizedEmail => new IdentityUser { NormalizedEmail = normalizedEmail });
+
+        // Act
+        var actual = await store.GetNormalizedEmailsAsync(users, CancellationToken.None);
+
+        // Assert
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    #endregion
+
     #region IUserStore
 
     [Test]
