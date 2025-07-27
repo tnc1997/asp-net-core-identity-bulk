@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -55,7 +56,7 @@ public class BulkUserStoreTests
         using var store = new BulkUserStore(_context);
 
         var expected = new List<string> { "alice@example.com", "bob@example.com" };
-        var users = expected.Select(userName => new IdentityUser { Email = userName });
+        var users = expected.Select(email => new IdentityUser { Email = email });
 
         // Act
         var actual = await store.GetEmailsAsync(users, CancellationToken.None);
@@ -274,6 +275,26 @@ public class BulkUserStoreTests
         var actual = await _context.UserLogins.ToListAsync();
 
         Assert.That(actual, Is.Empty);
+    }
+
+    #endregion
+
+    #region IBulkUserSecurityStampStore
+
+    [Test]
+    public async Task GetSecurityStampsAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var expected = new List<string> { Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
+        var users = expected.Select(securityStamp => new IdentityUser { SecurityStamp = securityStamp });
+
+        // Act
+        var actual = await store.GetSecurityStampsAsync(users, CancellationToken.None);
+
+        // Assert
+        Assert.That(actual, Is.EqualTo(expected));
     }
 
     #endregion
