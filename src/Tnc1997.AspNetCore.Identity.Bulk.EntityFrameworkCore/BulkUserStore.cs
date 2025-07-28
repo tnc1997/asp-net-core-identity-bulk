@@ -503,6 +503,17 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return Task.FromResult(users.Select(user => user.NormalizedUserName));
     }
 
+    public virtual Task<IEnumerable<string?>> GetUserIdsAsync(
+        IEnumerable<TUser> users,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(users);
+
+        return Task.FromResult(users.Select(user => user.Id.ToString()));
+    }
+
     public virtual Task<IEnumerable<string?>> GetUserNamesAsync(
         IEnumerable<TUser> users,
         CancellationToken cancellationToken)
