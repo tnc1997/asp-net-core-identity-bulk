@@ -27,6 +27,14 @@ public interface IBulkUserStore<TUser>
     Task<IEnumerable<IdentityResult>> DeleteAsync(IEnumerable<TUser> users, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Finds and returns the users, if any, who have the specified <see cref="userIds"/>.
+    /// </summary>
+    /// <param name="userIds">The user IDs to search for.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing the users matching the specified <paramref name="userIds"/> if they exist.</returns>
+    Task<IEnumerable<TUser?>> FindByIdsAsync(IEnumerable<string> userIds, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Gets the normalized names for the specified <paramref name="users"/>.
     /// </summary>
     /// <param name="users">The users whose normalized names should be retrieved.</param>

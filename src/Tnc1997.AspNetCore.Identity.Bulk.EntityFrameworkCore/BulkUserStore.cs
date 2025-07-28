@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -436,6 +437,27 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         }
 
         return Enumerable.Repeat(IdentityResult.Success, users.Count());
+    }
+
+    public virtual async Task<IEnumerable<TUser?>> FindByIdsAsync(
+        IEnumerable<string> userIds,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(userIds);
+
+        var normalizedUserIds = userIds
+            .Select(userId => TypeDescriptor.GetConverter(typeof(TKey)).ConvertFromInvariantString(userId))
+            .Cast<TKey>()
+            .ToList();
+
+        var users = await context
+            .Set<TUser>()
+            .Where(user => normalizedUserIds.Contains(user.Id))
+            .ToListAsync(cancellationToken);
+
+        return normalizedUserIds.Select(normalizedUserId => users.SingleOrDefault(user => normalizedUserId.Equals(user.Id)));
     }
 
     public virtual Task<IEnumerable<string?>> GetNormalizedUserNamesAsync(
