@@ -90,6 +90,22 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
 
     #region IBulkUserEmailStore
 
+    public virtual async Task<IEnumerable<TUser?>> FindByEmailsAsync(
+        IEnumerable<string> normalizedEmails,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(normalizedEmails);
+
+        var users = await context
+            .Set<TUser>()
+            .Where(user => normalizedEmails.Contains(user.NormalizedEmail))
+            .ToListAsync(cancellationToken);
+
+        return normalizedEmails.Select(normalizedEmail => users.SingleOrDefault(user => normalizedEmail == user.NormalizedEmail));
+    }
+
     public virtual Task<IEnumerable<string?>> GetEmailsAsync(
         IEnumerable<TUser> users,
         CancellationToken cancellationToken)

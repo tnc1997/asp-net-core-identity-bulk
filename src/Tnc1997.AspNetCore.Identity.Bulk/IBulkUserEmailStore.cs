@@ -9,6 +9,14 @@ public interface IBulkUserEmailStore<TUser>
     where TUser : class
 {
     /// <summary>
+    /// Finds and returns the users, if any, who have the specified <see cref="normalizedEmails"/>.
+    /// </summary>
+    /// <param name="normalizedEmails">The normalized emails to search for.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <returns>The task object containing the results of the asynchronous operation, the users matching the specified <paramref name="normalizedEmails"/> if they exist.</returns>
+    Task<IEnumerable<TUser?>> FindByEmailsAsync(IEnumerable<string> normalizedEmails, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Gets the emails for the specified <paramref name="users"/>.
     /// </summary>
     /// <param name="users">The users whose emails should be retrieved.</param>
