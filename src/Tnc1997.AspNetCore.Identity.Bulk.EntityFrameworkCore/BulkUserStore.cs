@@ -460,6 +460,22 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return normalizedUserIds.Select(normalizedUserId => users.SingleOrDefault(user => normalizedUserId.Equals(user.Id)));
     }
 
+    public virtual async Task<IEnumerable<TUser?>> FindByNamesAsync(
+        IEnumerable<string> normalizedUserNames,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(normalizedUserNames);
+
+        var users = await context
+            .Set<TUser>()
+            .Where(user => normalizedUserNames.Contains(user.NormalizedUserName))
+            .ToListAsync(cancellationToken);
+
+        return normalizedUserNames.Select(normalizedUserName => users.SingleOrDefault(user => normalizedUserName == user.NormalizedUserName));
+    }
+
     public virtual Task<IEnumerable<string?>> GetNormalizedUserNamesAsync(
         IEnumerable<TUser> users,
         CancellationToken cancellationToken)
