@@ -21,7 +21,12 @@ public class BulkUserValidator<TUser>(
         ArgumentNullException.ThrowIfNull(manager);
         ArgumentNullException.ThrowIfNull(users);
 
-        var errors = Enumerable.Repeat(new List<IdentityError>(), users.Count()).ToList();
+        var errors = new List<List<IdentityError>>();
+        
+        foreach (var _ in users)
+        {
+            errors.Add([]);
+        }
 
         await ValidateUserNames(manager, users, errors);
 
