@@ -21,7 +21,7 @@ public class BulkUserValidator<TUser>(
         ArgumentNullException.ThrowIfNull(manager);
         ArgumentNullException.ThrowIfNull(users);
 
-        var errors = new List<List<IdentityError>>();
+        var errors = Enumerable.Repeat(new List<IdentityError>(), users.Count()).ToList();
 
         await ValidateUserNames(manager, users, errors);
 
@@ -54,14 +54,7 @@ public class BulkUserValidator<TUser>(
         {
             if (string.IsNullOrWhiteSpace(userName) || (!string.IsNullOrEmpty(manager.Options.User.AllowedUserNameCharacters) && userName.Any(character => !manager.Options.User.AllowedUserNameCharacters.Contains(character))))
             {
-                if (i < errors.Count)
-                {
-                    errors[i].Add(ErrorDescriber.InvalidUserName(userName));
-                }
-                else
-                {
-                    errors.Add([ErrorDescriber.InvalidUserName(userName)]);
-                }
+                errors[i].Add(ErrorDescriber.InvalidUserName(userName));
             }
             else
             {
@@ -94,14 +87,7 @@ public class BulkUserValidator<TUser>(
         {
             if (!string.Equals(userIds[userNameIndexes[entityIndexes[i]]], entity))
             {
-                if (userNameIndexes[entityIndexes[i]] < errors.Count)
-                {
-                    errors[userNameIndexes[entityIndexes[i]]].Add(ErrorDescriber.DuplicateUserName(userNames.ElementAt(userNameIndexes[entityIndexes[i]])));
-                }
-                else
-                {
-                    errors.Add([ErrorDescriber.DuplicateUserName(userNames.ElementAt(userNameIndexes[entityIndexes[i]]))]);
-                }
+                errors[userNameIndexes[entityIndexes[i]]].Add(ErrorDescriber.DuplicateUserName(userNames.ElementAt(userNameIndexes[entityIndexes[i]])));
             }
 
             i += 1;
@@ -129,14 +115,7 @@ public class BulkUserValidator<TUser>(
         {
             if (string.IsNullOrWhiteSpace(email) || new EmailAddressAttribute().IsValid(email) is not true)
             {
-                if (i < errors.Count)
-                {
-                    errors[i].Add(ErrorDescriber.InvalidEmail(email));
-                }
-                else
-                {
-                    errors.Add([ErrorDescriber.InvalidEmail(email)]);
-                }
+                errors[i].Add(ErrorDescriber.InvalidEmail(email));
             }
             else
             {
@@ -169,14 +148,7 @@ public class BulkUserValidator<TUser>(
         {
             if (!string.Equals(userIds[emailIndexes[entityIndexes[i]]], entity))
             {
-                if (emailIndexes[entityIndexes[i]] < errors.Count)
-                {
-                    errors[emailIndexes[entityIndexes[i]]].Add(ErrorDescriber.DuplicateEmail(emails.ElementAt(emailIndexes[entityIndexes[i]])));
-                }
-                else
-                {
-                    errors.Add([ErrorDescriber.DuplicateEmail(emails.ElementAt(emailIndexes[entityIndexes[i]]))]);
-                }
+                errors[emailIndexes[entityIndexes[i]]].Add(ErrorDescriber.DuplicateEmail(emails.ElementAt(emailIndexes[entityIndexes[i]])));
             }
 
             i += 1;
