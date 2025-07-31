@@ -92,7 +92,7 @@ public class BulkUserValidator<TUser>(
         {
             if (!string.Equals(userIds[userNameIndexes[entityIndexes[i]]], entity))
             {
-                errors[userNameIndexes[entityIndexes[i]]].Add(ErrorDescriber.DuplicateUserName(userNames.ElementAt(userNameIndexes[entityIndexes[i]])));
+                errors[userNameIndexes[entityIndexes[i]]].Add(ErrorDescriber.DuplicateUserName(userNames[userNameIndexes[entityIndexes[i]]]));
             }
 
             i += 1;
@@ -153,7 +153,7 @@ public class BulkUserValidator<TUser>(
         {
             if (!string.Equals(userIds[emailIndexes[entityIndexes[i]]], entity))
             {
-                errors[emailIndexes[entityIndexes[i]]].Add(ErrorDescriber.DuplicateEmail(emails.ElementAt(emailIndexes[entityIndexes[i]])));
+                errors[emailIndexes[entityIndexes[i]]].Add(ErrorDescriber.DuplicateEmail(emails[emailIndexes[entityIndexes[i]]]));
             }
 
             i += 1;
