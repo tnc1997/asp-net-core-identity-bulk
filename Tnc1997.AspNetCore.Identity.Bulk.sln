@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tnc1997.AspNetCore.Identity
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tnc1997.AspNetCore.Identity.Bulk.EntityFrameworkCore", "src\Tnc1997.AspNetCore.Identity.Bulk.EntityFrameworkCore\Tnc1997.AspNetCore.Identity.Bulk.EntityFrameworkCore.csproj", "{37A34223-202E-4C01-8F4D-62904CC9D45A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tnc1997.AspNetCore.Identity.Bulk.Tests", "test\Tnc1997.AspNetCore.Identity.Bulk.Tests\Tnc1997.AspNetCore.Identity.Bulk.Tests.csproj", "{9EF0A669-1ACF-4809-AD35-E4FB6EE6B82A}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tnc1997.AspNetCore.Identity.Bulk.EntityFrameworkCore.Tests", "test\Tnc1997.AspNetCore.Identity.Bulk.EntityFrameworkCore.Tests\Tnc1997.AspNetCore.Identity.Bulk.EntityFrameworkCore.Tests.csproj", "{DD083F72-9D30-4ACD-8E34-AC0CAB764747}"
 EndProject
 Global
@@ -18,6 +20,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{E19246EF-B604-4821-A577-2E96546F2ED3} = {8B70BF0A-40BE-4C2B-AEB5-5F8AE5ADE17A}
 		{37A34223-202E-4C01-8F4D-62904CC9D45A} = {8B70BF0A-40BE-4C2B-AEB5-5F8AE5ADE17A}
+		{9EF0A669-1ACF-4809-AD35-E4FB6EE6B82A} = {C2184207-F7E2-42A6-9DA0-1D5DCF776D2C}
 		{DD083F72-9D30-4ACD-8E34-AC0CAB764747} = {C2184207-F7E2-42A6-9DA0-1D5DCF776D2C}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
@@ -29,6 +32,10 @@ Global
 		{37A34223-202E-4C01-8F4D-62904CC9D45A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37A34223-202E-4C01-8F4D-62904CC9D45A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{37A34223-202E-4C01-8F4D-62904CC9D45A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EF0A669-1ACF-4809-AD35-E4FB6EE6B82A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EF0A669-1ACF-4809-AD35-E4FB6EE6B82A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EF0A669-1ACF-4809-AD35-E4FB6EE6B82A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EF0A669-1ACF-4809-AD35-E4FB6EE6B82A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DD083F72-9D30-4ACD-8E34-AC0CAB764747}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DD083F72-9D30-4ACD-8E34-AC0CAB764747}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD083F72-9D30-4ACD-8E34-AC0CAB764747}.Release|Any CPU.ActiveCfg = Release|Any CPU
