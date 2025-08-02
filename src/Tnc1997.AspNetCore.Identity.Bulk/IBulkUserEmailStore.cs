@@ -17,6 +17,15 @@ public interface IBulkUserEmailStore<TUser>
     Task<IEnumerable<TUser?>> FindByEmailsAsync(IEnumerable<string> normalizedEmails, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Gets the flags indicating whether the email addresses for the specified <paramref name="users"/> have been verified, true if the email address is verified otherwise false.
+    /// </summary>
+    /// <param name="users">The users whose email confirmation statuses should be returned.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <returns>The task object containing the results of the asynchronous operation, the flags indicating whether the email addresses for the specified <paramref name="users"/> have been confirmed or not.
+    /// </returns>
+    Task<IEnumerable<bool>> GetEmailConfirmedAsync(IEnumerable<TUser> users, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Gets the emails for the specified <paramref name="users"/>.
     /// </summary>
     /// <param name="users">The users whose emails should be retrieved.</param>

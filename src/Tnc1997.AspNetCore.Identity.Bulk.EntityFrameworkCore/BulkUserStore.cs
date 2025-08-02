@@ -106,6 +106,15 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return normalizedEmails.Select(normalizedEmail => users.SingleOrDefault(user => normalizedEmail == user.NormalizedEmail));
     }
 
+    public virtual Task<IEnumerable<bool>> GetEmailConfirmedAsync(IEnumerable<TUser> users, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(users);
+
+        return Task.FromResult(users.Select(user => user.EmailConfirmed));
+    }
+
     public virtual Task<IEnumerable<string?>> GetEmailsAsync(
         IEnumerable<TUser> users,
         CancellationToken cancellationToken)
