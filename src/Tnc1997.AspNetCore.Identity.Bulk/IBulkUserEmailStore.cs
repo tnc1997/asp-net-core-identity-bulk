@@ -17,11 +17,11 @@ public interface IBulkUserEmailStore<TUser>
     Task<IEnumerable<TUser?>> FindByEmailsAsync(IEnumerable<string> normalizedEmails, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Gets the flags indicating whether the email addresses for the specified <paramref name="users"/> have been verified, true if the email address is verified otherwise false.
+    /// Gets the flags indicating whether the emails for the specified <paramref name="users"/> have been confirmed, true if the email is confirmed otherwise false.
     /// </summary>
     /// <param name="users">The users whose email confirmation statuses should be returned.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
-    /// <returns>The task object containing the results of the asynchronous operation, the flags indicating whether the email addresses for the specified <paramref name="users"/> have been confirmed or not.
+    /// <returns>The task object containing the results of the asynchronous operation, the flags indicating whether the emails for the specified <paramref name="users"/> have been confirmed or not.
     /// </returns>
     Task<IEnumerable<bool>> GetEmailConfirmedAsync(IEnumerable<TUser> users, CancellationToken cancellationToken);
 
@@ -40,6 +40,14 @@ public interface IBulkUserEmailStore<TUser>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
     /// <returns>The task object containing the results of the asynchronous lookup operation, the normalized emails for the specified <paramref name="users"/>.</returns>
     Task<IEnumerable<string?>> GetNormalizedEmailsAsync(IEnumerable<TUser> users, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Sets the flags indicating whether the specified users' emails have been confirmed or not.
+    /// </summary>
+    /// <param name="tuples">The users whose email confirmation status should be set and the flags indicating if the emails have been confirmed, true if the email is confirmed otherwise false.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <returns>The task object representing the asynchronous operation.</returns>
+    Task SetEmailConfirmedAsync(IEnumerable<(TUser, bool)> tuples, CancellationToken cancellationToken);
 
     /// <summary>
     /// Sets the emails for the specified users.
