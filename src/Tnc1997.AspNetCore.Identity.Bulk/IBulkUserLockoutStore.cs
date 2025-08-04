@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,14 @@ public interface IBulkUserLockoutStore<TUser>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
     /// <returns>The <see cref="Task"/> that represents the asynchronous operation, true if a user can be locked out, otherwise false.</returns>
     Task<IEnumerable<bool>> GetLockoutEnabledAsync(IEnumerable<TUser> users, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gets the last <see cref="DateTimeOffset"/> the users' last lockouts expired, if any.
+    /// </summary>
+    /// <param name="users">The users whose lockout end dates should be retrieved.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <returns>The <see cref="Task"/> that represents the asynchronous operation, the <see cref="DateTimeOffset"/>s containing the last time the users' lockouts expired, if any.</returns>
+    Task<IEnumerable<DateTimeOffset?>> GetLockoutEndDatesAsync(IEnumerable<TUser> users, CancellationToken cancellationToken);
 
     /// <summary>
     /// Sets the flags indicating if the specified users can be locked out.

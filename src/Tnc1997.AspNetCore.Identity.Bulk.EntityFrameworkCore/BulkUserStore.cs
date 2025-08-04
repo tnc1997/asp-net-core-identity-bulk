@@ -202,6 +202,17 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return Task.FromResult(users.Select(user => user.LockoutEnabled));
     }
 
+    public virtual Task<IEnumerable<DateTimeOffset?>> GetLockoutEndDatesAsync(
+        IEnumerable<TUser> users,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(users);
+
+        return Task.FromResult(users.Select(user => user.LockoutEnd));
+    }
+
     public virtual Task SetLockoutEnabledAsync(
         IEnumerable<(TUser, bool)> tuples,
         CancellationToken cancellationToken)
