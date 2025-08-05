@@ -229,6 +229,22 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return Task.CompletedTask;
     }
 
+    public virtual Task SetLockoutEndDatesAsync(
+        IEnumerable<(TUser, DateTimeOffset?)> tuples,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(tuples);
+
+        foreach (var (user, lockoutEnd) in tuples)
+        {
+            user.LockoutEnd = lockoutEnd;
+        }
+
+        return Task.CompletedTask;
+    }
+
     #endregion
 
     #region IBulkUserLoginStore

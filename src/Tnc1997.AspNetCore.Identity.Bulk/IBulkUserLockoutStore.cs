@@ -18,7 +18,7 @@ public interface IBulkUserLockoutStore<TUser>
     Task<IEnumerable<bool>> GetLockoutEnabledAsync(IEnumerable<TUser> users, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Gets the last <see cref="DateTimeOffset"/> the users' last lockouts expired, if any.
+    /// Gets the last <see cref="DateTimeOffset"/>s the users' last lockouts expired, if any. Any time in the past indicates a user is not locked out.
     /// </summary>
     /// <param name="users">The users whose lockout end dates should be retrieved.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
@@ -32,4 +32,12 @@ public interface IBulkUserLockoutStore<TUser>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
     /// <returns>The <see cref="Task"/> that represents the asynchronous operation.</returns>
     Task SetLockoutEnabledAsync(IEnumerable<(TUser, bool)> tuples, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Locks out the users until the specified end dates have passed. Setting an end date in the past immediately unlocks a user.
+    /// </summary>
+    /// <param name="tuples">The users whose lockout end dates should be set and the <see cref="DateTimeOffset"/>s after which the users' lockouts should end.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <returns>The <see cref="Task"/> that represents the asynchronous operation.</returns>
+    Task SetLockoutEndDatesAsync(IEnumerable<(TUser, DateTimeOffset?)> tuples, CancellationToken cancellationToken);
 }
