@@ -309,6 +309,31 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         return users;
     }
 
+    public virtual async Task<IEnumerable<IEnumerable<UserLoginInfo>>> GetLoginsAsync(
+        IEnumerable<TUser> users,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(users);
+
+        var userIds = users
+            .Select(user => user.Id)
+            .ToList();
+
+        var userLogins = await context
+            .Set<TUserLogin>()
+            .Where(userLogin => userIds.Contains(userLogin.UserId))
+            .ToListAsync(cancellationToken);
+
+        return userIds
+            .Select(userId => userLogins
+                .Where(userLogin => userLogin.UserId.Equals(userId))
+                .Select(userLogin => new UserLoginInfo(userLogin.LoginProvider, userLogin.ProviderKey, userLogin.ProviderDisplayName))
+                .ToList())
+            .ToList();
+    }
+
     public virtual async Task RemoveLoginsAsync(
         IEnumerable<(TUser, string, string)> tuples,
         CancellationToken cancellationToken)

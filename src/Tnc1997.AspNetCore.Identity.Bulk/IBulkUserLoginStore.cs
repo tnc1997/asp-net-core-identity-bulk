@@ -26,6 +26,14 @@ public interface IBulkUserLoginStore<TUser>
     Task<IEnumerable<TUser?>> FindByLoginsAsync(IEnumerable<(string, string)> tuples, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Gets the logins for the specified <param ref="users"/>.
+    /// </summary>
+    /// <param name="users">The users whose logins should be retrieved.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <returns>The <see cref="Task"/> for the asynchronous operation, containing the <see cref="UserLoginInfo"/>s for the specified <paramref name="users"/>.</returns>
+    Task<IEnumerable<IEnumerable<UserLoginInfo>>> GetLoginsAsync(IEnumerable<TUser> users, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Removes the provided logins from the specified users.
     /// </summary>
     /// <param name="tuples">The users to remove the logins from and the login providers whose information should be removed and the keys given by the external login providers for the specified users.</param>
