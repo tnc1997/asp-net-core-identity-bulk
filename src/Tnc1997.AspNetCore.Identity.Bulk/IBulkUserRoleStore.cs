@@ -26,6 +26,14 @@ public interface IBulkUserRoleStore<TUser>
     Task<IEnumerable<bool>> AreInRolesAsync(IEnumerable<(TUser, string)> tuples, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Gets the role names the specified <paramref name="users"/> belong to.
+    /// </summary>
+    /// <param name="users">The users whose role names should be retrieved.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+    /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing the role names the specified <paramref name="users"/> belong to.</returns>
+    Task<IEnumerable<IEnumerable<string>>> GetRolesAsync(IEnumerable<TUser> users, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Removes the specified users from the named roles.
     /// </summary>
     /// <param name="tuples">The users to remove the named roles from and the names of the roles to remove.</param>

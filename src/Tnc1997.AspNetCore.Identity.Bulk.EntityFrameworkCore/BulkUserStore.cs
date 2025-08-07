@@ -435,6 +435,32 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
             .ToList();
     }
 
+    public virtual async Task<IEnumerable<IEnumerable<string>>> GetRolesAsync(
+        IEnumerable<TUser> users,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(users);
+
+        var userIds = users
+            .Select(user => user.Id)
+            .ToList();
+
+        var args = await context
+            .Set<TUserRole>()
+            .Where(userRole => userIds.Contains(userRole.UserId))
+            .Join(context.Set<TRole>(), userRole => userRole.RoleId, role => role.Id, (userRole, role) => new { userRole.UserId, role.Name })
+            .ToListAsync(cancellationToken);
+
+        return userIds
+            .Select(userId => args
+                .Where(args => args.UserId.Equals(userId))
+                .Select(args => args.Name)
+                .ToList())
+            .ToList();
+    }
+
     public virtual async Task RemoveFromRolesAsync(
         IEnumerable<(TUser, string)> tuples,
         CancellationToken cancellationToken)
