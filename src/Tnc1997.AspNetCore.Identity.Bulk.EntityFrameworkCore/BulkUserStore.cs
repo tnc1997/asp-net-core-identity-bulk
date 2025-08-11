@@ -73,7 +73,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey>(
 public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>(
     TContext context,
     IdentityErrorDescriber? describer = null)
-    : IBulkUserEmailStore<TUser>, IBulkUserLockoutStore<TUser>, IBulkUserLoginStore<TUser>, IBulkUserRoleStore<TUser>, IBulkUserSecurityStampStore<TUser>
+    : IBulkUserEmailStore<TUser>, IBulkUserLockoutStore<TUser>, IBulkUserLoginStore<TUser>, IBulkUserPasswordStore<TUser>, IBulkUserRoleStore<TUser>, IBulkUserSecurityStampStore<TUser>
     where TUser : IdentityUser<TKey>
     where TRole : IdentityRole<TKey>
     where TContext : DbContext
@@ -359,6 +359,35 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
             .ToListAsync(cancellationToken);
 
         context.RemoveRange(userLogins);
+    }
+
+    #endregion
+
+    #region IBulkUserPasswordStore
+
+    public virtual Task<IEnumerable<string?>> GetPasswordHashesAsync(
+        IEnumerable<TUser> users,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(users);
+
+        return Task.FromResult(users.Select(user => user.PasswordHash));
+    }
+
+    public virtual Task SetPasswordHashesAsync(IEnumerable<(TUser, string?)> tuples, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(tuples);
+
+        foreach (var (user, passwordHash) in tuples)
+        {
+            user.PasswordHash = passwordHash;
+        }
+
+        return Task.CompletedTask;
     }
 
     #endregion
