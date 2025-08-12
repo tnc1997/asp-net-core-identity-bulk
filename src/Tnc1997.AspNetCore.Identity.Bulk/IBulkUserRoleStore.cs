@@ -36,7 +36,7 @@ public interface IBulkUserRoleStore<TUser>
     /// <summary>
     /// Gets the users who are members of the named roles.
     /// </summary>
-    /// <param name="roleNames">The names of the role whose memberships should be returned.</param>
+    /// <param name="roleNames">The names of the roles whose memberships should be returned.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
     /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing the users who are members of the named roles.</returns>
     Task<IEnumerable<IEnumerable<TUser>>> GetUsersInRolesAsync(IEnumerable<string> roleNames, CancellationToken cancellationToken);
