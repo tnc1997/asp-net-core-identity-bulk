@@ -12,7 +12,7 @@ public class BulkUserValidator<TUser>(
     : IBulkUserValidator<TUser>
     where TUser : class
 {
-    public IdentityErrorDescriber ErrorDescriber { get; } = errors ?? new IdentityErrorDescriber();
+    public IdentityErrorDescriber Describer { get; } = errors ?? new IdentityErrorDescriber();
 
     public async Task<IEnumerable<IdentityResult>> ValidateAsync(
         BulkUserManager<TUser> manager,
@@ -59,7 +59,7 @@ public class BulkUserValidator<TUser>(
         {
             if (string.IsNullOrWhiteSpace(userName) || (!string.IsNullOrEmpty(manager.Options.User.AllowedUserNameCharacters) && userName.Any(character => !manager.Options.User.AllowedUserNameCharacters.Contains(character))))
             {
-                errors[i].Add(ErrorDescriber.InvalidUserName(userName));
+                errors[i].Add(Describer.InvalidUserName(userName));
             }
             else
             {
@@ -92,7 +92,7 @@ public class BulkUserValidator<TUser>(
         {
             if (!string.Equals(userIds[userNameIndexes[entityIndexes[i]]], entity))
             {
-                errors[userNameIndexes[entityIndexes[i]]].Add(ErrorDescriber.DuplicateUserName(userNames[userNameIndexes[entityIndexes[i]]]));
+                errors[userNameIndexes[entityIndexes[i]]].Add(Describer.DuplicateUserName(userNames[userNameIndexes[entityIndexes[i]]]));
             }
 
             i += 1;
@@ -120,7 +120,7 @@ public class BulkUserValidator<TUser>(
         {
             if (string.IsNullOrWhiteSpace(email) || new EmailAddressAttribute().IsValid(email) is not true)
             {
-                errors[i].Add(ErrorDescriber.InvalidEmail(email));
+                errors[i].Add(Describer.InvalidEmail(email));
             }
             else
             {
@@ -153,7 +153,7 @@ public class BulkUserValidator<TUser>(
         {
             if (!string.Equals(userIds[emailIndexes[entityIndexes[i]]], entity))
             {
-                errors[emailIndexes[entityIndexes[i]]].Add(ErrorDescriber.DuplicateEmail(emails[emailIndexes[entityIndexes[i]]]));
+                errors[emailIndexes[entityIndexes[i]]].Add(Describer.DuplicateEmail(emails[emailIndexes[entityIndexes[i]]]));
             }
 
             i += 1;
