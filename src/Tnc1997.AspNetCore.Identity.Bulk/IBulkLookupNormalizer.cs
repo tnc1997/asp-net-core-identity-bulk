@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 namespace Tnc1997.AspNetCore.Identity.Bulk;
 
+/// <summary>Provides an abstraction for normalizing keys (emails/names) for lookup purposes.</summary>
 public interface IBulkLookupNormalizer
 {
     /// <summary>
