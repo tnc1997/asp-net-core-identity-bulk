@@ -10,22 +10,25 @@ using Microsoft.EntityFrameworkCore;
 namespace Tnc1997.AspNetCore.Identity.Bulk.EntityFrameworkCore;
 
 /// <summary>
-/// Represents a new instance of a persistence store for users, using the default implementation
-/// of <see cref="IdentityUser{TKey}"/> with a string as a primary key.
+/// Represents a new instance of a persistence store for users, using the default implementation of <see cref="IdentityUser{TKey}"/> with a string as a primary key.
 /// </summary>
 public class BulkUserStore(
     DbContext context,
     IdentityErrorDescriber? describer = null)
-    : BulkUserStore<IdentityUser<string>>(context, describer);
+    : BulkUserStore<IdentityUser<string>>(
+        context,
+        describer);
 
 /// <summary>
-/// Creates a new instance of a persistence store for the specified user type.
+/// Represents a new instance of a persistence store for the specified user type.
 /// </summary>
 /// <typeparam name="TUser">The type representing a user.</typeparam>
 public class BulkUserStore<TUser>(
     DbContext context,
     IdentityErrorDescriber? describer = null)
-    : BulkUserStore<TUser, IdentityRole<string>, DbContext, string>(context, describer)
+    : BulkUserStore<TUser, IdentityRole<string>, DbContext, string>(
+        context,
+        describer)
     where TUser : IdentityUser<string>;
 
 /// <summary>
@@ -37,7 +40,9 @@ public class BulkUserStore<TUser>(
 public class BulkUserStore<TUser, TRole, TContext>(
     TContext context,
     IdentityErrorDescriber? describer = null)
-    : BulkUserStore<TUser, TRole, TContext, string>(context, describer)
+    : BulkUserStore<TUser, TRole, TContext, string>(
+        context,
+        describer)
     where TUser : IdentityUser<string>
     where TRole : IdentityRole<string>
     where TContext : DbContext;
@@ -52,7 +57,9 @@ public class BulkUserStore<TUser, TRole, TContext>(
 public class BulkUserStore<TUser, TRole, TContext, TKey>(
     TContext context,
     IdentityErrorDescriber? describer = null)
-    : BulkUserStore<TUser, TRole, TContext, TKey, IdentityUserClaim<TKey>, IdentityUserRole<TKey>, IdentityUserLogin<TKey>, IdentityUserToken<TKey>, IdentityRoleClaim<TKey>>(context, describer)
+    : BulkUserStore<TUser, TRole, TContext, TKey, IdentityUserClaim<TKey>, IdentityUserRole<TKey>, IdentityUserLogin<TKey>, IdentityUserToken<TKey>, IdentityRoleClaim<TKey>>(
+        context,
+        describer)
     where TUser : IdentityUser<TKey>
     where TRole : IdentityRole<TKey>
     where TContext : DbContext
@@ -73,7 +80,9 @@ public class BulkUserStore<TUser, TRole, TContext, TKey>(
 public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, TUserLogin, TUserToken, TRoleClaim>(
     TContext context,
     IdentityErrorDescriber? describer = null)
-    : IBulkUserEmailStore<TUser>, IBulkUserLockoutStore<TUser>, IBulkUserLoginStore<TUser>, IBulkUserPasswordStore<TUser>, IBulkUserRoleStore<TUser>, IBulkUserSecurityStampStore<TUser>
+    : BulkUserOnlyStore<TUser, TContext, TKey, TUserClaim, TUserLogin, TUserToken>(
+        context,
+        describer), IBulkUserRoleStore<TUser>
     where TUser : IdentityUser<TKey>
     where TRole : IdentityRole<TKey>
     where TContext : DbContext
@@ -84,314 +93,6 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
     where TUserToken : IdentityUserToken<TKey>, new()
     where TRoleClaim : IdentityRoleClaim<TKey>, new()
 {
-    private readonly IdentityErrorDescriber _describer = describer ?? new IdentityErrorDescriber();
-
-    private bool _disposed;
-
-    #region IBulkUserEmailStore
-
-    public virtual async Task<IEnumerable<TUser?>> FindByEmailsAsync(
-        IEnumerable<string> normalizedEmails,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(normalizedEmails);
-
-        var users = await context
-            .Set<TUser>()
-            .Where(user => normalizedEmails.Contains(user.NormalizedEmail))
-            .ToListAsync(cancellationToken);
-
-        return normalizedEmails.Select(normalizedEmail => users.SingleOrDefault(user => normalizedEmail == user.NormalizedEmail));
-    }
-
-    public virtual Task<IEnumerable<bool>> GetEmailConfirmedAsync(
-        IEnumerable<TUser> users,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-
-        return Task.FromResult(users.Select(user => user.EmailConfirmed));
-    }
-
-    public virtual Task<IEnumerable<string?>> GetEmailsAsync(
-        IEnumerable<TUser> users,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-
-        return Task.FromResult(users.Select(user => user.Email));
-    }
-
-    public virtual Task<IEnumerable<string?>> GetNormalizedEmailsAsync(
-        IEnumerable<TUser> users,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-
-        return Task.FromResult(users.Select(user => user.NormalizedEmail));
-    }
-
-    public virtual Task SetEmailConfirmedAsync(
-        IEnumerable<(TUser, bool)> tuples,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(tuples);
-
-        foreach (var (user, emailConfirmed) in tuples)
-        {
-            user.EmailConfirmed = emailConfirmed;
-        }
-
-        return Task.CompletedTask;
-    }
-
-    public virtual Task SetEmailsAsync(
-        IEnumerable<(TUser, string?)> tuples,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(tuples);
-
-        foreach (var (user, email) in tuples)
-        {
-            user.Email = email;
-        }
-
-        return Task.CompletedTask;
-    }
-
-    public virtual Task SetNormalizedEmailsAsync(
-        IEnumerable<(TUser, string?)> tuples,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(tuples);
-
-        foreach (var (user, normalizedEmail) in tuples)
-        {
-            user.NormalizedEmail = normalizedEmail;
-        }
-
-        return Task.CompletedTask;
-    }
-
-    #endregion
-
-    #region IBulkUserLockoutStore
-
-    public virtual Task<IEnumerable<bool>> GetLockoutEnabledAsync(
-        IEnumerable<TUser> users,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-
-        return Task.FromResult(users.Select(user => user.LockoutEnabled));
-    }
-
-    public virtual Task<IEnumerable<DateTimeOffset?>> GetLockoutEndDatesAsync(
-        IEnumerable<TUser> users,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-
-        return Task.FromResult(users.Select(user => user.LockoutEnd));
-    }
-
-    public virtual Task SetLockoutEnabledAsync(
-        IEnumerable<(TUser, bool)> tuples,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(tuples);
-
-        foreach (var (user, lockoutEnabled) in tuples)
-        {
-            user.LockoutEnabled = lockoutEnabled;
-        }
-
-        return Task.CompletedTask;
-    }
-
-    public virtual Task SetLockoutEndDatesAsync(
-        IEnumerable<(TUser, DateTimeOffset?)> tuples,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(tuples);
-
-        foreach (var (user, lockoutEnd) in tuples)
-        {
-            user.LockoutEnd = lockoutEnd;
-        }
-
-        return Task.CompletedTask;
-    }
-
-    #endregion
-
-    #region IBulkUserLoginStore
-
-    public virtual Task AddLoginsAsync(
-        IEnumerable<(TUser, UserLoginInfo)> tuples,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(tuples);
-
-        var entities = tuples.Select(tuple => new TUserLogin
-        {
-            UserId = tuple.Item1.Id,
-            LoginProvider = tuple.Item2.LoginProvider,
-            ProviderKey = tuple.Item2.ProviderKey,
-            ProviderDisplayName = tuple.Item2.ProviderDisplayName
-        });
-
-        context.AddRange(entities);
-
-        return Task.CompletedTask;
-    }
-
-    public virtual async Task<IEnumerable<TUser?>> FindByLoginsAsync(
-        IEnumerable<(string, string)> tuples,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(tuples);
-
-        var loginProviders = new List<string>();
-        var providerKeys = new List<string>();
-
-        foreach (var (loginProvider, providerKey) in tuples)
-        {
-            loginProviders.Add(loginProvider);
-            providerKeys.Add(providerKey);
-        }
-
-        var args = await context
-            .Set<TUserLogin>()
-            .Where(userLogin => loginProviders.Contains(userLogin.LoginProvider) && providerKeys.Contains(userLogin.ProviderKey))
-            .GroupJoin(context.Set<TUser>(), userLogin => userLogin.UserId, user => user.Id, (userLogin, users) => new { UserLogin = userLogin, Users = users })
-            .SelectMany(args => args.Users.DefaultIfEmpty(), (args, user) => new { args.UserLogin, User = user })
-            .ToListAsync(cancellationToken);
-
-        var users = new List<TUser?>();
-
-        foreach (var (loginProvider, providerKey) in tuples)
-        {
-            var user = args
-                .Where(args => args.UserLogin.LoginProvider == loginProvider && args.UserLogin.ProviderKey == providerKey)
-                .Select(args => args.User)
-                .SingleOrDefault();
-
-            users.Add(user);
-        }
-
-        return users;
-    }
-
-    public virtual async Task<IEnumerable<IEnumerable<UserLoginInfo>>> GetLoginsAsync(
-        IEnumerable<TUser> users,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-
-        var userIds = users
-            .Select(user => user.Id)
-            .ToList();
-
-        var userLogins = await context
-            .Set<TUserLogin>()
-            .Where(userLogin => userIds.Contains(userLogin.UserId))
-            .ToListAsync(cancellationToken);
-
-        return userIds
-            .Select(userId => userLogins
-                .Where(userLogin => userLogin.UserId.Equals(userId))
-                .Select(userLogin => new UserLoginInfo(userLogin.LoginProvider, userLogin.ProviderKey, userLogin.ProviderDisplayName))
-                .ToList())
-            .ToList();
-    }
-
-    public virtual async Task RemoveLoginsAsync(
-        IEnumerable<(TUser, string, string)> tuples,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(tuples);
-
-        var userIds = new List<TKey>();
-        var loginProviders = new List<string>();
-        var providerKeys = new List<string>();
-
-        foreach (var (user, loginProvider, providerKey) in tuples)
-        {
-            userIds.Add(user.Id);
-            loginProviders.Add(loginProvider);
-            providerKeys.Add(providerKey);
-        }
-
-        var userLogins = await context
-            .Set<TUserLogin>()
-            .Where(userLogin => userIds.Contains(userLogin.UserId) && loginProviders.Contains(userLogin.LoginProvider) && providerKeys.Contains(userLogin.ProviderKey))
-            .ToListAsync(cancellationToken);
-
-        context.RemoveRange(userLogins);
-    }
-
-    #endregion
-
-    #region IBulkUserPasswordStore
-
-    public virtual Task<IEnumerable<string?>> GetPasswordHashesAsync(
-        IEnumerable<TUser> users,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-
-        return Task.FromResult(users.Select(user => user.PasswordHash));
-    }
-
-    public virtual Task SetPasswordHashesAsync(IEnumerable<(TUser, string?)> tuples, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(tuples);
-
-        foreach (var (user, passwordHash) in tuples)
-        {
-            user.PasswordHash = passwordHash;
-        }
-
-        return Task.CompletedTask;
-    }
-
-    #endregion
-
     #region IBulkUserRoleStore
 
     public virtual async Task AddToRolesAsync(
@@ -399,7 +100,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(tuples);
 
         var userIds = new List<TKey>();
@@ -411,7 +112,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
             normalizedNames.Add(normalizedName);
         }
 
-        var roles = await context
+        var roles = await Context
             .Set<TRole>()
             .Where(role => normalizedNames.Contains(role.NormalizedName))
             .ToListAsync(cancellationToken);
@@ -422,7 +123,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         {
             if (roles.SingleOrDefault(role => role.NormalizedName == normalizedNames[i]) is {  } role)
             {
-                context.Add(new TUserRole { UserId = userIds[i], RoleId = role.Id });
+                Context.Add(new TUserRole { UserId = userIds[i], RoleId = role.Id });
             }
             else
             {
@@ -441,7 +142,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(tuples);
 
         var userIds = new List<TKey>();
@@ -453,10 +154,10 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
             normalizedNames.Add(normalizedName);
         }
 
-        var userRoleUserIds = await context
+        var userRoleUserIds = await Context
             .Set<TRole>()
             .Where(role => normalizedNames.Contains(role.NormalizedName))
-            .Join(context.Set<TUserRole>(), role => role.Id, userRole => userRole.RoleId, (role, userRole) => userRole.UserId)
+            .Join(Context.Set<TUserRole>(), role => role.Id, userRole => userRole.RoleId, (role, userRole) => userRole.UserId)
             .ToListAsync(cancellationToken);
 
         return userIds
@@ -469,17 +170,17 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(users);
 
         var userIds = users
             .Select(user => user.Id)
             .ToList();
 
-        var args = await context
+        var args = await Context
             .Set<TUserRole>()
             .Where(userRole => userIds.Contains(userRole.UserId))
-            .Join(context.Set<TRole>(), userRole => userRole.RoleId, role => role.Id, (userRole, role) => new { userRole.UserId, role.Name })
+            .Join(Context.Set<TRole>(), userRole => userRole.RoleId, role => role.Id, (userRole, role) => new { userRole.UserId, role.Name })
             .ToListAsync(cancellationToken);
 
         return userIds
@@ -495,14 +196,14 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(roleNames);
 
-        var args = await context
+        var args = await Context
             .Set<TRole>()
             .Where(role => roleNames.Contains(role.NormalizedName))
-            .Join(context.Set<TUserRole>(), role => role.Id, userRole => userRole.RoleId, (role, userRole) => new { role.NormalizedName, userRole.UserId })
-            .Join(context.Set<TUser>(), args => args.UserId, user => user.Id, (args, user) => new { args.NormalizedName, User = user })
+            .Join(Context.Set<TUserRole>(), role => role.Id, userRole => userRole.RoleId, (role, userRole) => new { role.NormalizedName, userRole.UserId })
+            .Join(Context.Set<TUser>(), args => args.UserId, user => user.Id, (args, user) => new { args.NormalizedName, User = user })
             .ToListAsync(cancellationToken);
         
         return roleNames
@@ -518,7 +219,7 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(tuples);
 
         var userIds = new List<TKey>();
@@ -530,223 +231,15 @@ public class BulkUserStore<TUser, TRole, TContext, TKey, TUserClaim, TUserRole, 
             normalizedNames.Add(normalizedName);
         }
 
-        var userRoles = await context
+        var userRoles = await Context
             .Set<TRole>()
             .Where(role => normalizedNames.Contains(role.NormalizedName))
-            .Join(context.Set<TUserRole>(), role => role.Id, userRole => userRole.RoleId, (role, userRole) => userRole)
+            .Join(Context.Set<TUserRole>(), role => role.Id, userRole => userRole.RoleId, (role, userRole) => userRole)
             .Where(userRole => userIds.Contains(userRole.UserId))
             .ToListAsync(cancellationToken);
         
-        context.RemoveRange(userRoles);
+        Context.RemoveRange(userRoles);
     }
 
     #endregion
-
-    #region IBulkUserSecurityStampStore
-
-    public Task<IEnumerable<string?>> GetSecurityStampsAsync(
-	    IEnumerable<TUser> users,
-	    CancellationToken cancellationToken)
-    {
-	    cancellationToken.ThrowIfCancellationRequested();
-	    ObjectDisposedException.ThrowIf(_disposed, this);
-	    ArgumentNullException.ThrowIfNull(users);
-
-	    return Task.FromResult(users.Select(user => user.SecurityStamp));
-    }
-
-    public Task SetSecurityStampsAsync(
-	    IEnumerable<(TUser, string?)> tuples,
-	    CancellationToken cancellationToken)
-    {
-	    cancellationToken.ThrowIfCancellationRequested();
-	    ObjectDisposedException.ThrowIf(_disposed, this);
-	    ArgumentNullException.ThrowIfNull(tuples);
-
-	    foreach (var (user, securityStamp) in tuples)
-	    {
-		    user.SecurityStamp = securityStamp;
-	    }
-
-	    return Task.CompletedTask;
-    }
-
-    #endregion
-
-    #region IBulkUserStore
-
-    public virtual async Task<IEnumerable<IdentityResult>> CreateAsync(
-        IEnumerable<TUser> users,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-
-        context.AddRange(users);
-
-        await context.SaveChangesAsync(cancellationToken);
-
-        return Enumerable.Repeat(IdentityResult.Success, users.Count());
-    }
-
-    public virtual async Task<IEnumerable<IdentityResult>> DeleteAsync(
-        IEnumerable<TUser> users,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-
-        context.RemoveRange(users);
-
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            return Enumerable.Repeat(IdentityResult.Failed(_describer.ConcurrencyFailure()), users.Count());
-        }
-
-        return Enumerable.Repeat(IdentityResult.Success, users.Count());
-    }
-
-    public virtual async Task<IEnumerable<TUser?>> FindByIdsAsync(
-        IEnumerable<string> userIds,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(userIds);
-
-        var normalizedUserIds = userIds
-            .Select(userId => TypeDescriptor.GetConverter(typeof(TKey)).ConvertFromInvariantString(userId))
-            .Cast<TKey>()
-            .ToList();
-
-        var users = await context
-            .Set<TUser>()
-            .Where(user => normalizedUserIds.Contains(user.Id))
-            .ToListAsync(cancellationToken);
-
-        return normalizedUserIds.Select(normalizedUserId => users.SingleOrDefault(user => normalizedUserId.Equals(user.Id)));
-    }
-
-    public virtual async Task<IEnumerable<TUser?>> FindByNamesAsync(
-        IEnumerable<string> normalizedUserNames,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(normalizedUserNames);
-
-        var users = await context
-            .Set<TUser>()
-            .Where(user => normalizedUserNames.Contains(user.NormalizedUserName))
-            .ToListAsync(cancellationToken);
-
-        return normalizedUserNames.Select(normalizedUserName => users.SingleOrDefault(user => normalizedUserName == user.NormalizedUserName));
-    }
-
-    public virtual Task<IEnumerable<string?>> GetNormalizedUserNamesAsync(
-        IEnumerable<TUser> users,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-
-        return Task.FromResult(users.Select(user => user.NormalizedUserName));
-    }
-
-    public virtual Task<IEnumerable<string>> GetUserIdsAsync(
-        IEnumerable<TUser> users,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-
-        return Task.FromResult(users.Select(user => user.Id.ToString()!));
-    }
-
-    public virtual Task<IEnumerable<string?>> GetUserNamesAsync(
-        IEnumerable<TUser> users,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-
-        return Task.FromResult(users.Select(user => user.UserName));
-    }
-
-    public virtual Task SetNormalizedUserNamesAsync(
-        IEnumerable<(TUser, string?)> tuples,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(tuples);
-
-        foreach (var (user, normalizedName) in tuples)
-        {
-            user.NormalizedUserName = normalizedName;
-        }
-
-        return Task.CompletedTask;
-    }
-
-    public virtual Task SetUserNamesAsync(
-        IEnumerable<(TUser, string?)> tuples,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(tuples);
-
-        foreach (var (user, userName) in tuples)
-        {
-            user.UserName = userName;
-        }
-
-        return Task.CompletedTask;
-    }
-
-    public virtual async Task<IEnumerable<IdentityResult>> UpdateAsync(
-        IEnumerable<TUser> users,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        ArgumentNullException.ThrowIfNull(users);
-
-        foreach (var user in users)
-        {
-            context.Attach(user);
-            user.ConcurrencyStamp = Guid.NewGuid().ToString();
-            context.Update(user);
-        }
-
-        try
-        {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            return Enumerable.Repeat(IdentityResult.Failed(_describer.ConcurrencyFailure()), users.Count());
-        }
-
-        return Enumerable.Repeat(IdentityResult.Success, users.Count());
-    }
-
-    #endregion
-
-    public void Dispose()
-    {
-        _disposed = true;
-
-        GC.SuppressFinalize(this);
-    }
 }
