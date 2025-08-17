@@ -39,6 +39,10 @@ public static class BulkIdentityBuilderExtensions
             typeof(IBulkLookupNormalizer),
             typeof(UpperInvariantBulkLookupNormalizer));
 
+        builder.Services.AddScoped(
+            typeof(BulkUserManager<>).MakeGenericType(
+                builder.UserType));
+
         return builder;
     }
 }
