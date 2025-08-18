@@ -412,6 +412,26 @@ public class BulkUserStoreTests
 
     #endregion
 
+    #region IBulkUserPasswordStore
+
+    [Test]
+    public async Task GetPasswordHashesAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var expected = new List<string?> { "AQAAAAIAAYagAAAAEMjo1mEwZYEHPNsukX2L+EnyYkRUYYVvgrsmUDtk5Zt68NyfWca4sDeDioSSxNC66A==", "AQAAAAIAAYagAAAAEIm3WG9lrW0lus4A+meu989tydT+108jHtzYSUqJVLDNt85Q0KwCQVqgnOb4iYiQAQ==" };
+        var users = expected.Select(passwordHash => new IdentityUser { PasswordHash = passwordHash });
+
+        // Act
+        var actual = await store.GetPasswordHashesAsync(users, CancellationToken.None);
+
+        // Assert
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    #endregion
+
     #region IBulkUserRoleStore
 
     [Test]
