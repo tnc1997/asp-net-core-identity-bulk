@@ -213,6 +213,25 @@ public class BulkUserStoreTests
         Assert.That(actual, Is.EqualTo(expected));
     }
 
+    [Test]
+    public async Task SetLockoutEndDatesAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var users = new List<IdentityUser<string>> { new(), new() };
+        var expected = new List<DateTimeOffset?> { new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero) };
+        var tuples = users.Zip(expected).ToList();
+
+        // Act
+        await store.SetLockoutEndDatesAsync(tuples, CancellationToken.None);
+
+        // Assert
+        var actual = users.Select(user => user.LockoutEnd);
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
     #endregion
 
     #region IBulkUserLoginStore
