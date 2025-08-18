@@ -70,22 +70,6 @@ public class BulkUserStoreTests
     }
 
     [Test]
-    public async Task GetNormalizedEmailsAsync()
-    {
-        // Arrange
-        using var store = new BulkUserStore(_context);
-
-        var expected = new List<string> { "ALICE@EXAMPLE.COM", "BOB@EXAMPLE.COM" };
-        var users = expected.Select(normalizedEmail => new IdentityUser { NormalizedEmail = normalizedEmail });
-
-        // Act
-        var actual = await store.GetNormalizedEmailsAsync(users, CancellationToken.None);
-
-        // Assert
-        Assert.That(actual, Is.EqualTo(expected));
-    }
-
-    [Test]
     public async Task GetEmailsAsync()
     {
         // Arrange
@@ -96,6 +80,22 @@ public class BulkUserStoreTests
 
         // Act
         var actual = await store.GetEmailsAsync(users, CancellationToken.None);
+
+        // Assert
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public async Task GetNormalizedEmailsAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var expected = new List<string> { "ALICE@EXAMPLE.COM", "BOB@EXAMPLE.COM" };
+        var users = expected.Select(normalizedEmail => new IdentityUser { NormalizedEmail = normalizedEmail });
+
+        // Act
+        var actual = await store.GetNormalizedEmailsAsync(users, CancellationToken.None);
 
         // Assert
         Assert.That(actual, Is.EqualTo(expected));
@@ -121,25 +121,6 @@ public class BulkUserStoreTests
     }
 
     [Test]
-    public async Task SetNormalizedEmailsAsync()
-    {
-        // Arrange
-        using var store = new BulkUserStore(_context);
-
-        var users = new List<IdentityUser<string>> { new(), new() };
-        var expected = new List<string?> { "ALICE@EXAMPLE.COM", "BOB@EXAMPLE.COM" };
-        var tuples = users.Zip(expected).ToList();
-
-        // Act
-        await store.SetNormalizedEmailsAsync(tuples, CancellationToken.None);
-
-        // Assert
-        var actual = users.Select(user => user.NormalizedEmail);
-
-        Assert.That(actual, Is.EqualTo(expected));
-    }
-
-    [Test]
     public async Task SetEmailsAsync()
     {
         // Arrange
@@ -154,6 +135,25 @@ public class BulkUserStoreTests
 
         // Assert
         var actual = users.Select(user => user.Email);
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public async Task SetNormalizedEmailsAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var users = new List<IdentityUser<string>> { new(), new() };
+        var expected = new List<string?> { "ALICE@EXAMPLE.COM", "BOB@EXAMPLE.COM" };
+        var tuples = users.Zip(expected).ToList();
+
+        // Act
+        await store.SetNormalizedEmailsAsync(tuples, CancellationToken.None);
+
+        // Assert
+        var actual = users.Select(user => user.NormalizedEmail);
 
         Assert.That(actual, Is.EqualTo(expected));
     }
