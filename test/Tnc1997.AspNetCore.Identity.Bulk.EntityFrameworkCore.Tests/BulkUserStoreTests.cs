@@ -54,6 +54,22 @@ public class BulkUserStoreTests
     }
 
     [Test]
+    public async Task GetEmailConfirmedAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var expected = new List<bool> { true, false };
+        var users = expected.Select(emailConfirmed => new IdentityUser { EmailConfirmed = emailConfirmed });
+
+        // Act
+        var actual = await store.GetEmailConfirmedAsync(users, CancellationToken.None);
+
+        // Assert
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
     public async Task GetNormalizedEmailsAsync()
     {
         // Arrange
