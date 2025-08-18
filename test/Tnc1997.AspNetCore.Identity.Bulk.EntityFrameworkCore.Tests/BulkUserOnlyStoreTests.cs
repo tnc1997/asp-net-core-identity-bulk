@@ -512,6 +512,26 @@ public class BulkUserOnlyStoreTests
     }
 
     [Test]
+    public async Task FindByIdsAsync()
+    {
+        // Arrange
+        using var store = new BulkUserOnlyStore(_context);
+
+        var userIds = new List<string> { "1a535a33-ae5d-4ecd-8067-47acf8b4b678", "26606db9-66b3-4ab0-a8d0-8bd5860e776a" };
+        var users = userIds.Select(id => new IdentityUser { Id = id }).ToList();
+
+        _context.Users.AddRange(users);
+
+        await _context.SaveChangesAsync();
+
+        // Act
+        var actual = await store.FindByIdsAsync(userIds, CancellationToken.None);
+
+        // Assert
+        Assert.That(actual, Is.EqualTo(users).Using(new IdentityUserComparer()));
+    }
+
+    [Test]
     public async Task DeleteAsync()
     {
         // Arrange
