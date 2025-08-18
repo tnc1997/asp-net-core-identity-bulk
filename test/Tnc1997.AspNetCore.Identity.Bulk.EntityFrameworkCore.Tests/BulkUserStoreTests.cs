@@ -325,6 +325,49 @@ public class BulkUserStoreTests
     }
 
     [Test]
+    public async Task GetLoginsAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var users = new List<IdentityUser<string>>
+        {
+            new() { Id = "1a535a33-ae5d-4ecd-8067-47acf8b4b678" },
+            new() { Id = "26606db9-66b3-4ab0-a8d0-8bd5860e776a" }
+        };
+
+        _context.AddRange(users);
+
+        var userLogins = new List<IdentityUserLogin<string>>
+        {
+            new() { UserId = "1a535a33-ae5d-4ecd-8067-47acf8b4b678", LoginProvider = "Facebook", ProviderKey = "a8737ad6-71ab-46ca-b89d-a7d932e0f4c2" },
+            new() { UserId = "26606db9-66b3-4ab0-a8d0-8bd5860e776a", LoginProvider = "Google", ProviderKey = "b184c76d-cfa0-4eec-82b4-3a25b4f64574" }
+        };
+
+        _context.AddRange(userLogins);
+
+        await _context.SaveChangesAsync();
+
+        // Act
+        var actual = await store.GetLoginsAsync(users, CancellationToken.None);
+
+        // Assert
+        var expected = new List<List<UserLoginInfo>>
+        {
+            new()
+            {
+                new UserLoginInfo("Facebook", "a8737ad6-71ab-46ca-b89d-a7d932e0f4c2", null)
+            },
+            new()
+            {
+                new UserLoginInfo("Google", "b184c76d-cfa0-4eec-82b4-3a25b4f64574", null)
+            }
+        };
+
+        Assert.That(actual, Is.EqualTo(expected).Using(new UserLoginInfoComparer()));
+    }
+
+    [Test]
     public async Task RemoveLoginsAsync()
     {
         // Arrange
