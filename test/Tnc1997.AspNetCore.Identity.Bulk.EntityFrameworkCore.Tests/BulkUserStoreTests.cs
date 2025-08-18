@@ -34,6 +34,26 @@ public class BulkUserStoreTests
     #region IBulkUserEmailStore
 
     [Test]
+    public async Task FindByEmailsAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var normalizedEmails = new List<string> { "ALICE@EXAMPLE.COM", "BOB@EXAMPLE.COM" };
+        var users = normalizedEmails.Select(normalizedEmail => new IdentityUser { NormalizedEmail = normalizedEmail }).ToList();
+
+        _context.Users.AddRange(users);
+
+        await _context.SaveChangesAsync();
+
+        // Act
+        var actual = await store.FindByEmailsAsync(normalizedEmails, CancellationToken.None);
+
+        // Assert
+        Assert.That(actual, Is.EqualTo(users));
+    }
+
+    [Test]
     public async Task GetNormalizedEmailsAsync()
     {
         // Arrange
