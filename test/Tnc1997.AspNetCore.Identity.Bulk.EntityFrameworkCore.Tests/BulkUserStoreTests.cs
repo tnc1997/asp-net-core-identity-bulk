@@ -150,6 +150,53 @@ public class BulkUserStoreTests
     }
 
     [Test]
+    public async Task GetRolesAsync()
+    {
+        // Arrange
+        using var store = new BulkUserStore(_context);
+
+        var users = new List<IdentityUser<string>>
+        {
+            new() { Id = "1a535a33-ae5d-4ecd-8067-47acf8b4b678" },
+            new() { Id = "26606db9-66b3-4ab0-a8d0-8bd5860e776a" }
+        };
+
+        _context.AddRange(users);
+
+        var roles = new List<IdentityRole<string>>
+        {
+            new() { Id = "1d982b8d-e021-49a0-85a1-7fc9382d502f", Name = "editor" },
+            new() { Id = "2e482612-5f8c-4388-ab5f-3eb997cf1662", Name = "viewer" }
+        };
+
+        _context.AddRange(roles);
+
+        var userRoles = new List<IdentityUserRole<string>>
+        {
+            new()
+            {
+                UserId = "1a535a33-ae5d-4ecd-8067-47acf8b4b678", RoleId = "1d982b8d-e021-49a0-85a1-7fc9382d502f"
+            },
+            new()
+            {
+                UserId = "26606db9-66b3-4ab0-a8d0-8bd5860e776a", RoleId = "2e482612-5f8c-4388-ab5f-3eb997cf1662"
+            }
+        };
+
+        _context.AddRange(userRoles);
+
+        await _context.SaveChangesAsync();
+
+        // Act
+        var actual = await store.GetRolesAsync(users, CancellationToken.None);
+
+        // Assert
+        var expected = new List<List<string>> { new() { "editor" }, new() { "viewer" } };
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
     public async Task RemoveFromRolesAsync()
     {
         // Arrange
