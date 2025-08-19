@@ -1,37 +1,38 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 
-namespace Tnc1997.AspNetCore.Identity.Bulk.Tests;
-
-public class IdentityErrorComparer : IEqualityComparer<IdentityError>
+namespace Tnc1997.AspNetCore.Identity.Bulk.Tests
 {
-    public bool Equals(IdentityError? x, IdentityError? y)
+    public class IdentityErrorComparer : IEqualityComparer<IdentityError>
     {
-        if (ReferenceEquals(x, y))
+        public bool Equals(IdentityError? x, IdentityError? y)
         {
-            return true;
+            if (ReferenceEquals(x, y))
+            {
+                return true;
+            }
+
+            if (x is null)
+            {
+                return false;
+            }
+
+            if (y is null)
+            {
+                return false;
+            }
+
+            if (x.GetType() != y.GetType())
+            {
+                return false;
+            }
+
+            return x.Code == y.Code;
         }
 
-        if (x is null)
+        public int GetHashCode(IdentityError obj)
         {
-            return false;
+            return obj.Code.GetHashCode();
         }
-
-        if (y is null)
-        {
-            return false;
-        }
-
-        if (x.GetType() != y.GetType())
-        {
-            return false;
-        }
-
-        return x.Code == y.Code;
-    }
-
-    public int GetHashCode(IdentityError obj)
-    {
-        return obj.Code.GetHashCode();
     }
 }

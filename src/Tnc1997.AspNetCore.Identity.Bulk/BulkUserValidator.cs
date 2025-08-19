@@ -5,158 +5,164 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 
-namespace Tnc1997.AspNetCore.Identity.Bulk;
-
-public class BulkUserValidator<TUser>(
-    IdentityErrorDescriber? errors = null)
-    : IBulkUserValidator<TUser>
-    where TUser : class
+namespace Tnc1997.AspNetCore.Identity.Bulk
 {
-    public IdentityErrorDescriber Describer { get; } = errors ?? new IdentityErrorDescriber();
-
-    public async Task<IEnumerable<IdentityResult>> ValidateAsync(
-        BulkUserManager<TUser> manager,
-        IEnumerable<TUser> users)
+    public class BulkUserValidator<TUser>
+        : IBulkUserValidator<TUser>
+        where TUser : class
     {
-        ArgumentNullException.ThrowIfNull(manager);
-        ArgumentNullException.ThrowIfNull(users);
+        public BulkUserValidator(
+            IdentityErrorDescriber? errors = null)
+        {
+            Describer = errors ?? new IdentityErrorDescriber();
+        }
 
-        var errors = new List<List<IdentityError>>();
+        public virtual IdentityErrorDescriber Describer { get; }
+
+        public virtual async Task<IEnumerable<IdentityResult>> ValidateAsync(
+            BulkUserManager<TUser> manager,
+            IEnumerable<TUser> users)
+        {
+            if (manager is null) throw new ArgumentNullException(nameof(manager));
+            if (users is null) throw new ArgumentNullException(nameof(users));
+
+            var errors = new List<List<IdentityError>>();
         
-        foreach (var _ in users)
-        {
-            errors.Add([]);
-        }
-
-        await ValidateUserNames(manager, users, errors);
-
-        if (manager.Options.User.RequireUniqueEmail)
-        {
-            await ValidateEmails(manager, users, errors);
-        }
-
-        return errors.Select(errors => errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success);
-    }
-
-    private async Task ValidateUserNames(
-        BulkUserManager<TUser> manager,
-        IEnumerable<TUser> users,
-        List<List<IdentityError>> errors)
-    {
-        var userIds = new List<string>();
-
-        foreach (var userId in await manager.GetUserIdsAsync(users))
-        {
-            userIds.Add(userId);
-        }
-
-        var userNameIndexes = new List<int>();
-        var userNames = new List<string>();
-
-        var i = 0;
-
-        foreach (var userName in await manager.GetUserNamesAsync(users))
-        {
-            if (string.IsNullOrWhiteSpace(userName) || (!string.IsNullOrEmpty(manager.Options.User.AllowedUserNameCharacters) && userName.Any(character => !manager.Options.User.AllowedUserNameCharacters.Contains(character))))
+            foreach (var _ in users)
             {
-                errors[i].Add(Describer.InvalidUserName(userName));
-            }
-            else
-            {
-                userNameIndexes.Add(i);
-                userNames.Add(userName);
+                errors.Add(new List<IdentityError>());
             }
 
-            i += 1;
-        }
+            await ValidateUserNames(manager, users, errors);
 
-        var entityIndexes = new List<int>();
-        var entities = new List<TUser>();
-
-        i = 0;
-
-        foreach (var entity in await manager.FindByNamesAsync(userNames))
-        {
-            if (entity is not null)
+            if (manager.Options.User.RequireUniqueEmail)
             {
-                entityIndexes.Add(i);
-                entities.Add(entity);
+                await ValidateEmails(manager, users, errors);
             }
 
-            i += 1;
+            return errors.Select(errors => errors.Count > 0 ? IdentityResult.Failed(errors.ToArray()) : IdentityResult.Success);
         }
 
-        i = 0;
-
-        foreach (var entity in await manager.GetUserIdsAsync(entities))
+        private async Task ValidateUserNames(
+            BulkUserManager<TUser> manager,
+            IEnumerable<TUser> users,
+            List<List<IdentityError>> errors)
         {
-            if (!string.Equals(userIds[userNameIndexes[entityIndexes[i]]], entity))
+            var userIds = new List<string>();
+
+            foreach (var userId in await manager.GetUserIdsAsync(users))
             {
-                errors[userNameIndexes[entityIndexes[i]]].Add(Describer.DuplicateUserName(userNames[userNameIndexes[entityIndexes[i]]]));
+                userIds.Add(userId);
             }
 
-            i += 1;
+            var userNameIndexes = new List<int>();
+            var userNames = new List<string>();
+
+            var i = 0;
+
+            foreach (var userName in await manager.GetUserNamesAsync(users))
+            {
+                if (string.IsNullOrWhiteSpace(userName) || (!string.IsNullOrEmpty(manager.Options.User.AllowedUserNameCharacters) && userName.Any(character => !manager.Options.User.AllowedUserNameCharacters.Contains(character))))
+                {
+                    errors[i].Add(Describer.InvalidUserName(userName));
+                }
+                else
+                {
+                    userNameIndexes.Add(i);
+                    userNames.Add(userName);
+                }
+
+                i += 1;
+            }
+
+            var entityIndexes = new List<int>();
+            var entities = new List<TUser>();
+
+            i = 0;
+
+            foreach (var entity in await manager.FindByNamesAsync(userNames))
+            {
+                if (entity is not null)
+                {
+                    entityIndexes.Add(i);
+                    entities.Add(entity);
+                }
+
+                i += 1;
+            }
+
+            i = 0;
+
+            foreach (var entity in await manager.GetUserIdsAsync(entities))
+            {
+                if (!string.Equals(userIds[userNameIndexes[entityIndexes[i]]], entity))
+                {
+                    errors[userNameIndexes[entityIndexes[i]]].Add(Describer.DuplicateUserName(userNames[userNameIndexes[entityIndexes[i]]]));
+                }
+
+                i += 1;
+            }
         }
-    }
 
-    private async Task ValidateEmails(
-        BulkUserManager<TUser> manager,
-        IEnumerable<TUser> users,
-        List<List<IdentityError>> errors)
-    {
-        var userIds = new List<string>();
-
-        foreach (var userId in await manager.GetUserIdsAsync(users))
+        private async Task ValidateEmails(
+            BulkUserManager<TUser> manager,
+            IEnumerable<TUser> users,
+            List<List<IdentityError>> errors)
         {
-            userIds.Add(userId);
-        }
+            var userIds = new List<string>();
 
-        var emailIndexes = new List<int>();
-        var emails = new List<string>();
-
-        var i = 0;
-
-        foreach (var email in await manager.GetEmailsAsync(users))
-        {
-            if (string.IsNullOrWhiteSpace(email) || new EmailAddressAttribute().IsValid(email) is not true)
+            foreach (var userId in await manager.GetUserIdsAsync(users))
             {
-                errors[i].Add(Describer.InvalidEmail(email));
-            }
-            else
-            {
-                emailIndexes.Add(i);
-                emails.Add(email);
+                userIds.Add(userId);
             }
 
-            i += 1;
-        }
+            var emailIndexes = new List<int>();
+            var emails = new List<string>();
 
-        var entityIndexes = new List<int>();
-        var entities = new List<TUser>();
+            var i = 0;
 
-        i = 0;
-
-        foreach (var entity in await manager.FindByEmailsAsync(emails))
-        {
-            if (entity is not null)
+            foreach (var email in await manager.GetEmailsAsync(users))
             {
-                entityIndexes.Add(i);
-                entities.Add(entity);
+                if (string.IsNullOrWhiteSpace(email) || new EmailAddressAttribute().IsValid(email) is not true)
+                {
+                    errors[i].Add(Describer.InvalidEmail(email));
+                }
+                else
+                {
+                    emailIndexes.Add(i);
+                    emails.Add(email);
+                }
+
+                i += 1;
             }
 
-            i += 1;
-        }
+            var entityIndexes = new List<int>();
+            var entities = new List<TUser>();
 
-        i = 0;
+            i = 0;
 
-        foreach (var entity in await manager.GetUserIdsAsync(entities))
-        {
-            if (!string.Equals(userIds[emailIndexes[entityIndexes[i]]], entity))
+            foreach (var entity in await manager.FindByEmailsAsync(emails))
             {
-                errors[emailIndexes[entityIndexes[i]]].Add(Describer.DuplicateEmail(emails[emailIndexes[entityIndexes[i]]]));
+                if (entity is not null)
+                {
+                    entityIndexes.Add(i);
+                    entities.Add(entity);
+                }
+
+                i += 1;
             }
 
-            i += 1;
+            i = 0;
+
+            foreach (var entity in await manager.GetUserIdsAsync(entities))
+            {
+                if (!string.Equals(userIds[emailIndexes[entityIndexes[i]]], entity))
+                {
+                    errors[emailIndexes[entityIndexes[i]]].Add(Describer.DuplicateEmail(emails[emailIndexes[entityIndexes[i]]]));
+                }
+
+                i += 1;
+            }
         }
     }
 }

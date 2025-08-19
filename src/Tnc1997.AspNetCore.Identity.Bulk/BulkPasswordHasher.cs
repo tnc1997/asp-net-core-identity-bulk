@@ -1,40 +1,48 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 
-namespace Tnc1997.AspNetCore.Identity.Bulk;
-
-public class BulkPasswordHasher<TUser>(
-    IPasswordHasher<TUser> inner)
-    : IBulkPasswordHasher<TUser>
-    where TUser : class
+namespace Tnc1997.AspNetCore.Identity.Bulk
 {
-    public IEnumerable<string> HashPasswords(
-        IEnumerable<(TUser, string)> tuples)
+    public class BulkPasswordHasher<TUser>
+        : IBulkPasswordHasher<TUser>
+        where TUser : class
     {
-        var hashes = new List<string>();
+        private readonly IPasswordHasher<TUser> _inner;
 
-        foreach (var (user, password) in tuples)
+        public BulkPasswordHasher(
+            IPasswordHasher<TUser> inner)
         {
-            var hash = inner.HashPassword(user, password);
-
-            hashes.Add(hash);
+            _inner = inner;
         }
 
-        return hashes;
-    }
-
-    public IEnumerable<PasswordVerificationResult> VerifyHashedPasswords(
-        IEnumerable<(TUser, string, string)> tuples)
-    {
-        var results = new List<PasswordVerificationResult>();
-
-        foreach (var (user, hashedPassword, providedPassword) in tuples)
+        public virtual IEnumerable<string> HashPasswords(
+            IEnumerable<(TUser, string)> tuples)
         {
-            var result = inner.VerifyHashedPassword(user, hashedPassword, providedPassword);
+            var hashes = new List<string>();
 
-            results.Add(result);
+            foreach (var (user, password) in tuples)
+            {
+                var hash = _inner.HashPassword(user, password);
+
+                hashes.Add(hash);
+            }
+
+            return hashes;
         }
 
-        return results;
+        public virtual IEnumerable<PasswordVerificationResult> VerifyHashedPasswords(
+            IEnumerable<(TUser, string, string)> tuples)
+        {
+            var results = new List<PasswordVerificationResult>();
+
+            foreach (var (user, hashedPassword, providedPassword) in tuples)
+            {
+                var result = _inner.VerifyHashedPassword(user, hashedPassword, providedPassword);
+
+                results.Add(result);
+            }
+
+            return results;
+        }
     }
 }
