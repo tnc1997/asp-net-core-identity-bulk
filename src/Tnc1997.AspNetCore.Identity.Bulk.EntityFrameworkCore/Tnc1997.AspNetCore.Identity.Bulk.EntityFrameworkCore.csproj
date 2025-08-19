@@ -5,6 +5,20 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <Authors>Thomas Clark</Authors>
+    <Copyright>Copyright (c) 2025 Thomas Clark</Copyright>
+    <Description>ASP.NET Core Identity Bulk allows you to perform bulk ASP.NET Core Identity operations.</Description>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>$(RepositoryUrl)/releases</PackageReleaseNotes>
+    <PackageTags>aspnetcore identity membership bulk entityframeworkcore</PackageTags>
+		<RepositoryType>GitHub</RepositoryType>
+    <RepositoryUrl>https://github.com/tnc1997/asp-net-core-identity-bulk</RepositoryUrl>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.0"/>
   </ItemGroup>
@@ -27,6 +41,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Tnc1997.AspNetCore.Identity.Bulk\Tnc1997.AspNetCore.Identity.Bulk.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../../LICENSE" Pack="true" PackagePath=""/>
+    <None Include="../../README.md" Pack="true" PackagePath=""/>
   </ItemGroup>
 
 </Project>
