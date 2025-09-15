@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [Conventional Commits](https://www.conventionalcommits.org) for commit guidelines.
 
+## 0.2.0 (2025-09-15)
+
+### Bug Fixes
+
+* add to roles normalize names ([#2](https://github.com/tnc1997/asp-net-core-identity-bulk/issues/2)) ([50004bd](https://github.com/tnc1997/asp-net-core-identity-bulk/commit/50004bdae2a06c6800e3c82f25fe61a9c3aecef8))
+* remove from roles normalize names ([#4](https://github.com/tnc1997/asp-net-core-identity-bulk/issues/4)) ([be12f14](https://github.com/tnc1997/asp-net-core-identity-bulk/commit/be12f14cd01c728df937abdb64d73aa2a27b1537))
+
 ## 0.1.0 (2025-08-20)
 
 ### Features
