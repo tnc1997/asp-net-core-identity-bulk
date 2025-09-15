@@ -707,14 +707,12 @@ namespace Tnc1997.AspNetCore.Identity.Bulk
             ThrowIfDisposed();
             if (tuples is null) throw new ArgumentNullException(nameof(tuples));
 
-            var inner1 = new List<(TUser, string)>();
-            var roleNames1 = new List<string>();
+            var names1 = new List<string>();
             var users1 = new List<TUser>();
 
-            foreach (var (user, roleName) in tuples)
+            foreach (var (user, name) in tuples)
             {
-                inner1.Add((user, roleName));
-                roleNames1.Add(roleName);
+                names1.Add(name);
                 users1.Add(user);
             }
 
@@ -722,11 +720,11 @@ namespace Tnc1997.AspNetCore.Identity.Bulk
 
             var i = 0;
 
-            foreach (var isInRole in await GetUserRoleStore().AreInRolesAsync(users1.Zip(NormalizeNames(roleNames1).OfType<string>()), CancellationToken))
+            foreach (var isInRole in await GetUserRoleStore().AreInRolesAsync(users1.Zip(NormalizeNames(names1).OfType<string>().ToList()), CancellationToken))
             {
                 if (!isInRole)
                 {
-                    results.Add(IdentityResult.Failed(ErrorDescriber.UserNotInRole(roleNames1[i])));
+                    results.Add(IdentityResult.Failed(ErrorDescriber.UserNotInRole(names1[i])));
                 }
                 else
                 {
@@ -737,7 +735,7 @@ namespace Tnc1997.AspNetCore.Identity.Bulk
             }
 
             var indexes2 = new List<int>();
-            var inner2 = new List<(TUser, string)>();
+            var names2 = new List<string>();
             var users2 = new List<TUser>();
 
             for (i = 0; i < results.Count; i++)
@@ -748,11 +746,11 @@ namespace Tnc1997.AspNetCore.Identity.Bulk
                 }
 
                 indexes2.Add(i);
-                inner2.Add(inner1[i]);
+                names2.Add(names1[i]);
                 users2.Add(users1[i]);
             }
 
-            await GetUserRoleStore().RemoveFromRolesAsync(inner2, CancellationToken);
+            await GetUserRoleStore().RemoveFromRolesAsync(users2.Zip(NormalizeNames(names2).OfType<string>().ToList()), CancellationToken);
 
             foreach (var (index, result) in indexes2.Zip(await UpdateAsync(users2)))
             {
