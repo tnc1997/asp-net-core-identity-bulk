@@ -701,7 +701,7 @@ namespace Tnc1997.AspNetCore.Identity.Bulk
         /// </summary>
         /// <param name="tuples">The users to remove the named roles from and the names of the roles to remove.</param>
         /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="IdentityResult"/>s of the operation.</returns>
-        public virtual async Task<IEnumerable<IdentityResult>> RemoveFromRoleAsync(
+        public virtual async Task<IEnumerable<IdentityResult>> RemoveFromRolesAsync(
             IEnumerable<(TUser, string)> tuples)
         {
             ThrowIfDisposed();
